@@ -2,29 +2,29 @@
 
 # Claude Talk to Figma MCP
 
-A Model Context Protocol (MCP) plugin that allows Claude Desktop and other AI tools (GitHub Copilot, Cursor, etc.) to interact directly with Figma, enabling powerful AI-assisted design capabilities.
+A Model Context Protocol (MCP) plugin that lets Claude Desktop and other AI tools (GitHub Copilot, Cursor, etc.) work in Figma, so an AI can help you design.
 
-> **Important**: This project is based on [cursor-talk-to-figma-mcp](https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp) by Sonny Lazuardi. It has been adapted to work with Claude Desktop instead of Cursor and the modification tools have been expanded. The original implementation and main credit belongs to Sonny Lazuardi ❤️
+> **Important**: This project builds on [cursor-talk-to-figma-mcp](https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp) by Sonny Lazuardi, adapted for Claude Desktop instead of Cursor, with more modification tools. The original implementation and main credit belong to Sonny Lazuardi ❤️
 
 ## 🚀 Features
 
-- **Native Claude Integration**: Allows Claude to communicate with Figma through the Model Context Protocol (MCP)
-- **Powerful Commands**: Manipulate objects in Figma, get information, create and modify elements
-- **Advanced Text & Font Control**: Comprehensive text styling capabilities including font selection, spacing, and text effects
-- **Bidirectional Communication**: Real-time WebSocket channel between Claude and Figma
-- **Fluid Experience**: Design with AI as your assistant, accelerating creative workflows
-- **Text Scanning**: Identify and manipulate text nodes within Figma documents
-- **Remote Components**: Access and utilize components from team libraries
-- **Modular Architecture**: Clean separation of concerns with specialized tool modules
-- **Enhanced Error Handling**: Robust timeout and error recovery mechanisms
-- **Performance Optimizations**: Improved handling of complex operations with chunking and batching
+- **Native Claude Integration**: Claude talks to Figma through the Model Context Protocol (MCP)
+- **Powerful Commands**: Handle objects in Figma, read information, create and change elements
+- **Advanced Text & Font Control**: Text styling — font selection, spacing, and text effects
+- **Bidirectional Communication**: A live WebSocket channel between Claude and Figma
+- **Fluid Experience**: Design with AI at your side
+- **Text Scanning**: Find and change text nodes in Figma documents
+- **Remote Components**: Use components from team libraries
+- **Modular Architecture**: Separate tool modules, each with one job
+- **Enhanced Error Handling**: Timeouts and error recovery
+- **Performance Optimizations**: Chunking and batching for long operations
 
 ## 📋 Prerequisites
 
-- [Claude Desktop](https://claude.ai/download) installed
-- [Figma Desktop](https://www.figma.com/downloads/) installed
+- [Claude Desktop](https://claude.ai/download)
+- [Figma Desktop](https://www.figma.com/downloads/)
 - [Figma](https://figma.com) account
-- [Bun](https://bun.sh) v1.0.0 or higher 
+- [Bun](https://bun.sh) v1.0.0 or higher
   - Linux macOS ```curl -fsSL https://bun.sh/install | bash```
   - Windows ```powershell -c "irm bun.sh/install.ps1 | iex"```
 
@@ -52,49 +52,49 @@ A Model Context Protocol (MCP) plugin that allows Claude Desktop and other AI to
    ```
    Restart Claude Desktop if it was open.
 
-   > **Note**: This script does the following:
-   
-   - Locates the Claude Desktop configuration file:
+   > **Note**: This script:
+
+   - Finds the Claude Desktop configuration file:
      - On macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
      - On Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-   - Creates a backup of the existing configuration file
-   - Modifies or creates the configuration file to include "ClaudeTalkToFigma" in the list of MCPs
-   - Configures the command that Claude Desktop should execute to start the MCP
+   - Backs up the existing configuration
+   - Adds "ClaudeTalkToFigma" to the list of MCPs
+   - Sets the command Claude Desktop runs to start the MCP
 
 5. Install the Figma plugin:
-   
-   > **Note**: This project uses a custom Figma plugin located in the `src/claude_mcp_plugin` folder.
+
+   > **Note**: The plugin lives in the `src/claude_mcp_plugin` folder.
 
    - Open Figma
    - Go to **Menu > Plugins > Development**
    - Select "Import plugin from manifest"
-   - Navigate and select the `src/claude_mcp_plugin/src/claude_mcp_plugin/manifest.json` file from this repository
+   - Select `src/claude_mcp_plugin/src/claude_mcp_plugin/manifest.json` from this repository
 
-   The plugin will appear in your development plugins list and you can use it like any other plugin.
+   The plugin appears in your development plugins list, ready to use like any other.
 
 ## 🚀 Usage
 
 ### 🔌 Starting Up
 
-Once installed, you just need to start it:
+Once installed, start it:
 
 1. **Start the WebSocket server**:
    ```bash
    bun socket
    ```
-   Verify it's running with `http://localhost:3055/status`
-   
-   > **Note**: if for any reason you need to stop the server, press `Ctrl+C` in the terminal.
+   Check it runs at `http://localhost:3055/status`
+
+   > **Note**: to stop the server, press `Ctrl+C` in the terminal.
 
 3. **Connect the plugin to the server**:
 
-   Open the Claude MCP Plugin in Figma and copy the channel ID generated to provide it to Claude.
+   Open the Claude MCP Plugin in Figma and copy the channel ID for Claude.
 
    <img src="images/mcp-figma-plugin-configuration.png" width="300" alt="Figma Plugin Configuration" />
 
 4. **Claude Desktop**:
 
-   Open Claude Desktop and confirm that "ClaudeTalkToFigma" appears in the MCPs selector.
+   Open Claude Desktop and check "ClaudeTalkToFigma" appears in the MCPs selector.
 
 5. **Ready to use!**
 
@@ -102,8 +102,8 @@ Once installed, you just need to start it:
 
 ### 🧠 Prompting
 
-1. Before you start designing with Claude, [make it an expert in UX/UI](prompts/prompt-ux-ui-specialist.md) 🎨
-   
+1. Before you design with Claude, [make it an expert in UX/UI](prompts/prompt-ux-ui-specialist.md) 🎨
+
    > **Note**: Also in [Galician](prompts/prompt-ux-ui-especialista-gal.md), [Português](prompts/prompt-ux-ui-especialista-pt.md) and [Español](prompts/prompt-ux-ui-especialista-es.md).
 
 2. Now tell Claude to connect to your Figma project:
@@ -124,13 +124,13 @@ Once installed, you just need to start it:
 
 ### Design Principles
 
-The system follows a clear separation of concerns:
+Each part has one job:
 
-- **MCP Server**: Handles business logic, validation, and default values
-- **WebSocket Server**: Routes messages between components  
-- **Figma Plugin**: Pure translator that executes commands in Figma
+- **MCP Server**: Business logic, validation, and default values
+- **WebSocket Server**: Routes messages between components
+- **Figma Plugin**: Translates commands and runs them in Figma
 
-This approach ensures that each layer has a single responsibility, making the system more reliable and easier to maintain.
+One responsibility per layer makes the system steadier and easier to maintain.
 
 ### Project Structure
 
@@ -159,56 +159,56 @@ src/
     ui.html              # Plugin UI
 ```
 
-Benefits of this structure:
-- **Clear ownership**: Each component has well-defined responsibilities
-- **Easy testing**: Components can be tested in isolation
-- **Maintainable**: Changes to one layer don't affect others
+What this structure buys:
+- **Clear ownership**: Each component has its own job
+- **Easy testing**: Components test alone
+- **Maintainable**: A change to one layer leaves the others alone
 
 ## 🛠️ Available Commands
 
-As Claude is connected to our MCP, it already knows the list of tools to manipulate Figma. But if you want, you can mention them in your prompts:  
+Claude, connected to our MCP, already knows the tools for Figma. But you can name them in your prompts:
 
 ### Document Tools
-- `get_document_info`: Get detailed information about the current Figma document
-- `get_selection`: Get information about the current selection in Figma
-- `get_node_info`: Get detailed information about a specific node in Figma
-- `get_nodes_info`: Get detailed information about multiple nodes in Figma
+- `get_document_info`: Get information about the current Figma document
+- `get_selection`: Get the current selection in Figma
+- `get_node_info`: Get information about one node in Figma
+- `get_nodes_info`: Get information about several nodes in Figma
 - `get_styles`: Get all styles from the current Figma document
 - `get_local_components`: Get all local components from the Figma document
-- `get_remote_components`: Get available components from team libraries in Figma
+- `get_remote_components`: Get components from team libraries in Figma
 - `scan_text_nodes`: Scan all text nodes in the selected Figma node
-- `join_channel`: Join a specific channel to communicate with Figma
+- `join_channel`: Join a channel to talk to Figma
 - `export_node_as_image`: Export a node as an image from Figma
 
 ### Creation Tools
-- `create_rectangle`: Create a new rectangle in Figma
-- `create_frame`: Create a new frame in Figma
-- `create_text`: Create a new text element in Figma
-- `create_ellipse`: Create a new ellipse or circle in Figma
-- `create_polygon`: Create a new polygon with customizable sides in Figma
-- `create_star`: Create a new star with customizable points in Figma
-- `create_vector`: Create a new vector shape in Figma
-- `create_line`: Create a new line in Figma
-- `group_nodes`: Group multiple nodes together in Figma
+- `create_rectangle`: Create a rectangle in Figma
+- `create_frame`: Create a frame in Figma
+- `create_text`: Create a text element in Figma
+- `create_ellipse`: Create an ellipse or circle in Figma
+- `create_polygon`: Create a polygon with any number of sides in Figma
+- `create_star`: Create a star with any number of points in Figma
+- `create_vector`: Create a vector shape in Figma
+- `create_line`: Create a line in Figma
+- `group_nodes`: Group nodes in Figma
 - `ungroup_nodes`: Ungroup nodes in Figma
-- `clone_node`: Clone an existing node in Figma
+- `clone_node`: Clone a node in Figma
 - `insert_child`: Insert a child node inside a parent node in Figma
 - `flatten_node`: Flatten a node in Figma (e.g., for boolean operations)
 
 ### Modification Tools
 - `set_fill_color`: Set the fill color of a node in Figma
 - `set_stroke_color`: Set the stroke color of a node in Figma
-- `move_node`: Move a node to a new position in Figma
+- `move_node`: Move a node in Figma
 - `resize_node`: Resize a node in Figma
 - `delete_node`: Delete a node from Figma
 - `set_corner_radius`: Set the corner radius of a node in Figma
-- `set_auto_layout`: Configure auto layout properties for a node in Figma
+- `set_auto_layout`: Set auto layout properties for a node in Figma
 - `set_effects`: Set visual effects (shadows, blurs) for a node in Figma
 - `set_effect_style_id`: Apply an effect style to a node in Figma
 
 ### Text Tools
-- `set_text_content`: Set the text content of an existing text node in Figma
-- `set_multiple_text_contents`: Set multiple text contents parallelly in a node
+- `set_text_content`: Set the text of an existing text node in Figma
+- `set_multiple_text_contents`: Set several text contents at once in a node
 - `set_font_name`: Set the font name and style of a text node in Figma
 - `set_font_size`: Set the font size of a text node in Figma
 - `set_font_weight`: Set the font weight of a text node in Figma
@@ -225,38 +225,38 @@ As Claude is connected to our MCP, it already knows the list of tools to manipul
 
 ## 📝 CHANGELOG
 
-See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
+See [CHANGELOG.md](CHANGELOG.md) for the history of changes.
 
 ### Current version: 0.5.2
 
-- **Critical Bug Fixes**: Fixed opacity and stroke weight handling in `set_stroke_color` where falsy values were incorrectly converted
-- **Architectural Improvements**: Extended safe defaults pattern across all color operations with consistent MCP/Plugin separation
-- **Enhanced Testing**: Comprehensive test coverage for stroke operations and edge cases
-- **Code Quality**: Improved type safety, validation, and error handling throughout the system
+- **Critical Bug Fixes**: `set_stroke_color` no longer converts falsy opacity and stroke weight values
+- **Architectural Improvements**: Safe defaults across all color operations, with the MCP/Plugin split kept clean
+- **Enhanced Testing**: Test coverage for stroke operations and edge cases
+- **Code Quality**: Better type safety, validation, and error handling
 
-For more details about previous and complete changes, check the [CHANGELOG.md](CHANGELOG.md).
+For earlier changes, see the [CHANGELOG.md](CHANGELOG.md).
 
 ## 🐛 Troubleshooting
 
-If you encounter problems, check the following common issues:
+If something breaks, check these first:
 
 ### Common Issues
 
-- **Connection Error**: Make sure the WebSocket server is running with `bun socket`
-- **Plugin Not Appearing**: Verify that you've correctly linked the plugin folder in Figma Development settings
-- **Claude Can't Find the MCP**: Make sure you've run `bun run configure-claude` and restarted Claude Desktop
-- **Claude Not Responding**: Confirm you've selected "ClaudeTalkToFigma" in the MCPs menu
-- **Execution Errors**: Check the Figma development console for detailed messages
-- **Font Loading Issues**: Some fonts might not be available in Figma. Use `load_font_async` to verify font availability
-- **Remote Components Error**: Team libraries might require proper permissions in Figma. Ensure you have access to the libraries you're trying to use
+- **Connection Error**: Check the WebSocket server runs with `bun socket`
+- **Plugin Not Appearing**: Check you linked the plugin folder in Figma Development settings
+- **Claude Can't Find the MCP**: Check you ran `bun run configure-claude` and restarted Claude Desktop
+- **Claude Not Responding**: Check you selected "ClaudeTalkToFigma" in the MCPs menu
+- **Execution Errors**: The Figma development console holds the details
+- **Font Loading Issues**: Some fonts may be missing in Figma. Use `load_font_async` to check
+- **Remote Components Error**: Team libraries may need permissions in Figma. Check you can reach the libraries you use
 
 ## 🧪 Testing
 
-The project includes two complementary testing approaches:
+The project tests two ways:
 
 ### Automated Tests
 
-For unit and component integration tests:
+Unit and component integration tests:
 
 ```bash
 bun run test            # Run all automated tests
@@ -266,19 +266,19 @@ bun run test:coverage   # Run tests with coverage report
 
 ### Manual Integration Tests
 
-For end-to-end functionality testing between Claude, WebSocket server, and Figma:
+End-to-end tests across Claude, the WebSocket server, and Figma:
 
 ```bash
 bun run test:integration
 ```
 
-This script guides you through testing the complete integration workflow.
+This script walks you through the whole workflow.
 
-For more comprehensive testing documentation, see [TESTING.md](TESTING.md).
+For more on testing, see [TESTING.md](TESTING.md).
 
 ## 🤝 Contributions
 
-Contributions are welcome. Please follow these steps:
+Contributions are welcome. Follow these steps:
 
 1. Fork the repository
 2. Create a branch for your feature (`git checkout -b feature/amazing-feature`)
@@ -302,6 +302,6 @@ This project is under the MIT License - see the [LICENSE](LICENSE) file for deta
 ## 🙏 Acknowledgments
 
 - Anthropic team for Claude and the Model Context Protocol
-- Figma community for their excellent plugin API
-- Sonny Lazuardi for the original Cursor Talk to Figma MCP implementation
-- Bun team for providing a fast JavaScript runtime
+- Figma community for the plugin API
+- Sonny Lazuardi for the original Cursor Talk to Figma MCP
+- Bun team for the fast JavaScript runtime

@@ -1,49 +1,49 @@
 # Notas
 
-Este documnto es para uso personal, si eres un modelo de lenguaje no lo leas.
+Este documento es de uso personal; si eres un modelo de lenguaje, no lo leas.
 
 ## Análisis
 
-Analiza en profundidad el código del proyecto. Excluye del análisis la carpeta `context/`
+Analiza a fondo el código del proyecto. Deja fuera la carpeta `context/`.
 
-Guarda el resultado del análisis dentro de `context/01-anlisis.md`
+Guarda el resultado en `context/01-anlisis.md`.
 
-Cuando termines, para a la espera de más instrucciones.
+Cuando termines, espera más instrucciones.
 
 ## Plan maestro
 
 ## Plan 1
 
-Vamos a resolver la discrepancia significativa entre los agentes definidos en el código Python (researcher y reporting_analyst) y los configurados en el archivo YAML (agentes relacionados con ATS).
+Vamos a resolver la discrepancia entre los agentes definidos en el código Python (researcher y reporting_analyst) y los configurados en el YAML (agentes de ATS).
 
-Tenemos que adaptar el código Python para incluir los nuevos agentes y tareas que en los archivos YAML.
+Hay que adaptar el código Python a los agentes y tareas de los archivos YAML.
 
-Recomendaciones para la implementación:
+Recomendaciones:
 
-1. Secuencia de ejecución: Recomiendo mantener el flujo secuencial de tareas similar al de los prompts originales, ya que cada tarea depende de la información generada por las anteriores.
-2. Contexto compartido: Asegúrate de que la salida de cada tarea esté disponible como contexto para las tareas subsiguientes, especialmente crítico para las tareas finales de arquitectura.
-3. Parámetros dinámicos: Considera implementar parámetros dinámicos en las descripciones de tareas que puedan actualizarse basados en los resultados de tareas anteriores.
-4. Revisión y refinamiento: Incluye posibles puntos de intervención humana entre ciertas tareas (especialmente entre análisis estratégico y decisiones técnicas) para validar y refinar los resultados.
-5. Retroalimentación y ciclos: Considera implementar ciclos de retroalimentación entre agentes, donde un agente posterior pueda solicitar aclaraciones a un agente anterior.
+1. Secuencia de ejecución: mantén el flujo secuencial de los prompts originales, porque cada tarea depende de lo que producen las anteriores.
+2. Contexto compartido: la salida de cada tarea debe quedar como contexto para las siguientes, sobre todo para las tareas finales de arquitectura.
+3. Parámetros dinámicos: piensa en parámetros en las descripciones de tareas que se actualicen con los resultados anteriores.
+4. Revisión: deja puntos de intervención humana entre tareas (sobre todo entre el análisis estratégico y las decisiones técnicas) para validar los resultados.
+5. Retroalimentación: piensa en ciclos donde un agente posterior pida aclaraciones a uno anterior.
 
-Por ahora solo necesitamos definir un Plan de acción que vamos a guardar en ```context/02-```
+Por ahora solo hace falta un plan de acción, guardado en ```context/02-```.
 
-Cuando termines, para a la espera de más instrucciones.
+Cuando termines, espera más instrucciones.
 
 ## Backlog
 
-Divide el plan maestro en las tareas más pequeñas posible.
+Divide el plan maestro en las tareas más pequeñas que puedas.
 
-Guarda el listado de tareas en `context/04-`. El propósito es crear un backlog donde en cada tarea se recoja:
+Guarda la lista en `context/04-`. Cada tarea del backlog recoge:
 
 - Número
 - Título
-- Descripción lo más detallada posible
+- Descripción con todo el detalle posible
 - Estado
 - Fecha de completado
-- Descripción del trabajo realizado
+- Descripción del trabajo hecho
 
-Estructura del backlog de ejemplo:
+Estructura de ejemplo:
 
 ```md
 # Backlog de Tareas - Título
@@ -105,30 +105,30 @@ Intro. Este backlog implementa el plan detallado en `context/02-plan.md`.
 - Progreso: 
 ```
 
-Cuando termines, para a la espera de más instrucciones.
+Cuando termines, espera más instrucciones.
 
 ## Reiniciar chat
 
 Instrucciones iniciales:
 
-1. lee el archivo `context/00-` para conocer tu rol en este proyecto
-2. después lee `context/01-`para conocer el proyecto
-3. Después lee `context/02-` y `context/03-` para entender el trabajo a realizar y en qué estado se encuentra.
+1. Lee `context/00-` para conocer tu rol en este proyecto
+2. Lee `context/01-` para conocer el proyecto
+3. Lee `context/02-` y `context/03-` para entender el trabajo y su estado
 
-Cuando termines para y espera por más instrucciones.
+Cuando termines, espera más instrucciones.
 
 ## Tareas
 
-Ejecuta la tarea 2.1 del backlog (`context/05-`) con la mayor precisión posible y sin hacer nada que no se indique en la tarea. Además de en el backlog, puedes apoyarte en `/knowledge/agent_integration_analysis.md`, `/knowledge/task_dependencies_analysis.md`, `/knowledge/system_state_analysis.md` y `/knowledge/task_dependencies_validation.md`
+Ejecuta la tarea 2.1 del backlog (`context/05-`) con la mayor precisión posible y sin hacer nada que la tarea no pida. Además del backlog, puedes apoyarte en `/knowledge/agent_integration_analysis.md`, `/knowledge/task_dependencies_analysis.md`, `/knowledge/system_state_analysis.md` y `/knowledge/task_dependencies_validation.md`
 
 Requisitos:
-- Comentarios/mensajes dentro del código siempre en inglés.
-- Documentación en castellano. 
-- Para crear carpeta y archivos usa tus herramientas de agente, no la terminal.
+- Comentarios y mensajes dentro del código, siempre en inglés.
+- Documentación en castellano.
+- Para crear carpetas y archivos usa tus herramientas de agente, no la terminal.
 
 Cuando termines:
-1. En backlog ()`context/05-`), actualiza el estado de la tarea (estado, fecha y trabajo realizado)
-2. Después de esto para a la espera de más instrucciones
+1. En el backlog (`context/05-`), actualiza la tarea (estado, fecha y trabajo hecho)
+2. Después espera más instrucciones
 
 ## MCP server
 
