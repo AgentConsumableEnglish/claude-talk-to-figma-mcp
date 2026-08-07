@@ -16,8 +16,8 @@
 
 ### Flujo Esperado
 1. Claude → MCP: `set_stroke_color { r: 1, g: 0, b: 0, a: 0, strokeWeight: 3 }`
-2. MCP → WebSocket: Comando procesado con valores preservados
-3. WebSocket → Figma: Ejecución del comando
+2. MCP → WebSocket: Comando con los valores intactos
+3. WebSocket → Figma: El comando se ejecuta
 4. Figma: Rectangle con stroke rojo transparente, peso 3
 
 ### Resultado
@@ -60,7 +60,7 @@ Set stroke color of node "Frame 1" to RGBA(1, 0, 0, 0) with weight 3
 3. Figma: Shape sin borde visible
 
 ### Resultado
-⚠️ **PARCIALMENTE EXITOSO CON LIMITACIÓN**
+⚠️ **PARCIAL, CON LÍMITE DE LA API**
 
 **Error encontrado:**
 ```
@@ -89,7 +89,7 @@ Set stroke color of node "Frame 1" to RGBA(1, 0, 0, 0) with weight 0.1
 - ⚠️ strokeWeight = 0.1 (mínimo permitido, no 0 exacto)
 - ✅ Resultado visual: sin borde visible
 
-**Nota:** La API de Figma requiere strokeWeight > 0. Se usó opacidad 0 para lograr el efecto visual deseado.
+**Nota:** La API de Figma exige strokeWeight > 0. La opacidad 0 dio el efecto buscado.
 
 ---
 
@@ -134,19 +134,19 @@ Set stroke color of node "Frame 1" to RGBA(0, 0, 1, 1) with weight 1
 
 | Prueba | Estado | Observaciones |
 |--------|--------|---------------|
-| Stroke Rojo Transparente | ✅ Exitoso | Todos los valores preservados correctamente |
-| Remover Borde | ⚠️ Parcial | API no permite strokeWeight=0, se usó alternativa |
-| Stroke Azul por Defecto | ✅ Exitoso | Valores por defecto aplicados correctamente |
+| Stroke Rojo Transparente | ✅ Exitoso | Todos los valores intactos |
+| Remover Borde | ⚠️ Parcial | La API no permite strokeWeight=0; hubo rodeo |
+| Stroke Azul por Defecto | ✅ Exitoso | Defaults aplicados |
 
 ## Conclusiones
 
-1. **Preservación de Valores**: El MCP preserva correctamente todos los valores especificados
-2. **Valores por Defecto**: Se aplican automáticamente cuando no se especifican (a=1, strokeWeight=1)
-3. **Limitación API**: strokeWeight debe ser > 0, no se puede establecer exactamente a 0
-4. **Workaround Efectivo**: Usar opacidad 0 logra el efecto visual de "sin borde"
+1. **Valores**: El MCP conserva todos los valores dados
+2. **Defaults**: Se aplican solos cuando faltan (a=1, strokeWeight=1)
+3. **Límite de la API**: strokeWeight debe ser > 0; el 0 exacto no entra
+4. **Rodeo**: Opacidad 0 da el efecto de "sin borde"
 
 ## Recomendaciones
 
-- Para remover bordes visualmente: usar `a: 0` en lugar de `strokeWeight: 0`
-- Aprovechar los valores por defecto para simplificar comandos
-- Considerar la limitación de strokeWeight mínimo en futuras implementaciones
+- Para quitar bordes a la vista: `a: 0`, no `strokeWeight: 0`
+- Los defaults acortan los comandos
+- Tener presente el mínimo de strokeWeight en el futuro
