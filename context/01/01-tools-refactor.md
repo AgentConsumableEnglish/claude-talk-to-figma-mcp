@@ -2,7 +2,7 @@
 
 ## 📋 Resumen de la Propuesta
 
-El archivo `server.ts` del proyecto "claude-talk-to-figma-mcp" actualmente supera las 2500 líneas, lo que dificulta su mantenimiento y comprensión. Esta propuesta plantea una refactorización estructural que divide el código en módulos más pequeños y manejables, manteniendo la funcionalidad actual sin añadir nuevas características.
+`server.ts` pasa de 2500 líneas y cuesta mantenerlo y entenderlo. La propuesta: partir el código en módulos pequeños, sin cambiar lo que hace ni añadir nada.
 
 ## 🔍 Análisis del Código Actual
 
@@ -15,11 +15,11 @@ El archivo `server.ts` contiene:
 5. Definición de prompts
 6. Manejo de errores y tipos
 
-Esta estructura monolítica dificulta la navegación, el mantenimiento y las futuras ampliaciones.
+Este monolito estorba para navegar, mantener y ampliar.
 
 ## 🧩 Estructura Propuesta
 
-Propongo dividir el código en los siguientes módulos:
+Propongo estos módulos:
 
 ```
 src/talk_to_figma_mcp/
@@ -59,14 +59,14 @@ mkdir -p src/talk_to_figma_mcp/{config,types,utils,tools,prompts}
 
 **types/index.ts:**
 ```typescript
-// Definir interfaces para respuestas de Figma
+// Interfaces para respuestas de Figma
 export interface FigmaResponse {
   id: string;
   result?: any;
   error?: string;
 }
 
-// Definir interfaz para actualizaciones de progreso
+// Actualizaciones de progreso
 export interface CommandProgressUpdate {
   type: 'command_progress';
   commandId: string;
@@ -83,7 +83,7 @@ export interface CommandProgressUpdate {
   timestamp: number;
 }
 
-// Definir tipos de comandos Figma
+// Tipos de comandos Figma
 export type FigmaCommand =
   | "get_document_info"
   | "get_selection"
@@ -93,7 +93,7 @@ export type FigmaCommand =
 
 **config/config.ts:**
 ```typescript
-// Configuración y análisis de argumentos
+// Configuración y argumentos
 import { z } from "zod";
 
 // Argumentos de línea de comandos
@@ -120,7 +120,7 @@ export const SERVER_CONFIG = {
 
 **utils/logger.ts:**
 ```typescript
-// Funciones personalizadas de logging
+// Logging
 export const logger = {
   info: (message: string) => process.stderr.write(`[INFO] ${message}\n`),
   debug: (message: string) => process.stderr.write(`[DEBUG] ${message}\n`),
@@ -132,7 +132,7 @@ export const logger = {
 
 **utils/figma-helpers.ts:**
 ```typescript
-// Funciones auxiliares para procesar datos de Figma
+// Auxiliares para datos de Figma
 export function rgbaToHex(color: any): string {
   // Implementación existente
 }
@@ -165,17 +165,17 @@ const pendingRequests = new Map<string, {
   lastActivity: number;
 }>();
 
-// Función para conectar con Figma
+// Conectar con Figma
 export function connectToFigma(port: number = defaultPort) {
   // Implementación existente
 }
 
-// Función para unirse a un canal
+// Unirse a un canal
 export async function joinChannel(channelName: string): Promise<void> {
   // Implementación existente
 }
 
-// Función para enviar comandos a Figma
+// Enviar comandos a Figma
 export function sendCommandToFigma(
   command: FigmaCommand,
   params: unknown = {},
@@ -193,7 +193,7 @@ import { z } from "zod";
 import { sendCommandToFigma } from "../utils/websocket";
 import { filterFigmaNode } from "../utils/figma-helpers";
 
-// Exportar función para registrar herramientas en el servidor
+// Registrar herramientas en el servidor
 export function registerDocumentTools(server: any) {
   // Document Info Tool
   server.tool(
@@ -241,7 +241,7 @@ export function registerDocumentTools(server: any) {
 }
 ```
 
-Las demás herramientas se organizarían de manera similar en sus respectivos archivos.
+Las demás herramientas van igual, cada una en su archivo.
 
 ### 5. Organizar Prompts ✅
 
@@ -346,25 +346,25 @@ main().catch(error => {
 
 ## 🔄 Proceso de Migración
 
-Para garantizar una migración segura y sin interrupciones, recomiendo el siguiente enfoque:
+Para migrar sin romper nada:
 
 1. Crear la nueva estructura de directorios
-2. Mover el código a los nuevos archivos manteniendo su funcionalidad
+2. Mover el código a los nuevos archivos sin cambiar lo que hace
 3. Integrar todos los módulos en el nuevo archivo principal
-4. Ejecutar pruebas exhaustivas para verificar que todo funcione como antes
-5. Resolver cualquier problema de importación o dependencia circular
+4. Probar a fondo que todo funciona como antes
+5. Resolver importaciones y dependencias circulares
 
 ## 🏁 Beneficios de la Refactorización
 
-1. **Mejor Mantenibilidad**: Archivos más pequeños y enfocados
-2. **Mayor Claridad**: Organización lógica por tipos de herramientas
-3. **Facilidad de Extensión**: Añadir nuevas herramientas será más sencillo
-4. **Mejor Colaboración**: Varios desarrolladores pueden trabajar en diferentes módulos
-5. **Pruebas Simplificadas**: Unidades más pequeñas que son más fáciles de probar
+1. **Mantenibilidad**: Archivos pequeños y centrados
+2. **Claridad**: Organizado por tipos de herramienta
+3. **Extensión**: Añadir herramientas será más fácil
+4. **Colaboración**: Varios desarrolladores, cada uno en su módulo
+5. **Pruebas**: Unidades pequeñas se prueban mejor
 
 ## 🚀 Recomendaciones Adicionales
 
-- Mantener la compatibilidad con la configuración actual de compilación (tsup.config.ts)
-- Actualizar scripts de construcción para manejar la nueva estructura de archivos
-- Considerar la adición de pruebas unitarias para cada módulo
-- Documentar la nueva estructura para facilitar el trabajo futuro
+- Mantener la configuración de compilación actual (tsup.config.ts)
+- Actualizar los scripts de build a la nueva estructura
+- Pensar en pruebas unitarias por módulo
+- Documentar la nueva estructura

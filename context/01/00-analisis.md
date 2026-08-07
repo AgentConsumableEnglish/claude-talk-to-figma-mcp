@@ -2,25 +2,25 @@
 
 ## 📋 Resumen del Proyecto
 
-Este proyecto implementa un plugin de Figma que permite la integración de Claude AI con Figma mediante el Model Context Protocol (MCP). Facilita la comunicación bidireccional entre Claude y Figma, permitiendo al asistente de IA interpretar, manipular y crear diseños directamente en Figma.
+Un plugin de Figma que une Claude AI con Figma mediante el Model Context Protocol (MCP). La comunicación va en ambos sentidos: el asistente de IA lee, cambia y crea diseños en Figma.
 
 ## 🏗️ Arquitectura del Sistema
 
-La arquitectura del sistema consta de tres componentes principales:
+Tres componentes:
 
 1. **Plugin de Figma (claude_mcp_plugin)**: 
-   - Ejecutado dentro del entorno de Figma
+   - Corre dentro de Figma
    - Establece una conexión WebSocket con el servidor MCP
    - Expone las APIs de Figma al servidor
 
 2. **Servidor MCP (talk_to_figma_mcp)**:
-   - Actúa como un intermediario entre Claude y Figma
+   - Media entre Claude y Figma
    - Implementa la especificación del Model Context Protocol
-   - Proporciona herramientas (tools) que Claude puede invocar para interactuar con Figma
+   - Da herramientas (tools) que Claude invoca para trabajar en Figma
 
 3. **Cliente WebSocket (socket.ts)**:
-   - Maneja la comunicación WebSocket entre el plugin de Figma y el servidor MCP
-   - Gestiona la reconexión automática y el seguimiento de solicitudes pendientes
+   - Lleva la comunicación WebSocket entre el plugin y el servidor MCP
+   - Reconecta solo y sigue las solicitudes pendientes
 
 ## 🔄 Flujo de Comunicación
 
@@ -28,16 +28,16 @@ La arquitectura del sistema consta de tres componentes principales:
 Claude AI <---> Servidor MCP <---> WebSocket <---> Plugin de Figma <---> API de Figma
 ```
 
-El flujo de datos sigue estos pasos:
+El flujo de datos:
 1. Claude invoca una herramienta del servidor MCP
 2. El servidor MCP envía un comando al plugin de Figma a través de WebSocket
-3. El plugin ejecuta el comando utilizando la API de Figma
+3. El plugin ejecuta el comando con la API de Figma
 4. El resultado se devuelve al servidor MCP
 5. El servidor MCP formatea la respuesta y la devuelve a Claude
 
 ## 🧰 Herramientas Disponibles
 
-El servidor MCP expone numerosas herramientas que Claude puede utilizar para interactuar con Figma:
+Las herramientas que el servidor MCP da a Claude:
 
 ### Obtención de Información
 - `get_document_info`: Información sobre el documento actual
@@ -93,59 +93,59 @@ El servidor MCP expone numerosas herramientas que Claude puede utilizar para int
 
 ## 📚 Prompts y Estrategias
 
-El servidor incluye varios prompts predefinidos que ofrecen estrategias y mejores prácticas para trabajar con Figma:
+El servidor trae prompts con estrategias y buenas prácticas para Figma:
 
-- `design_strategy`: Mejores prácticas para trabajar con diseños de Figma
-- `read_design_strategy`: Mejores prácticas para leer diseños de Figma
-- `text_replacement_strategy`: Enfoque sistemático para reemplazar texto en diseños de Figma
+- `design_strategy`: Buenas prácticas para diseños de Figma
+- `read_design_strategy`: Buenas prácticas para leer diseños de Figma
+- `text_replacement_strategy`: Método para reemplazar texto en diseños de Figma
 
 ## 🔒 Manejo de Errores y Seguridad
 
-- El sistema implementa control de errores en todas las herramientas
-- Utiliza filtrado para reducir la complejidad de las respuestas de Figma
-- Implementa un sistema de registro personalizado que escribe en stderr para evitar la captura
+- Todas las herramientas controlan sus errores
+- Filtra las respuestas de Figma para simplificarlas
+- El registro escribe en stderr para que no lo capturen
 
 ## 🔌 Configuración y Conexión
 
-- El servidor admite argumentos de línea de comandos para personalizar:
+- El servidor acepta argumentos de línea de comandos:
   - URL del servidor (`--server`)
   - Puerto (`--port`, predeterminado: 3055)
   - Intervalo de reconexión (`--reconnect-interval`)
 - Permite la conexión a WebSocket seguro (WSS) o inseguro (WS)
-- Implementa reconexión automática para mayor robustez
+- Reconecta solo
 
 ## 💬 Gestión de Canales
 
-- Admite la conexión a canales específicos para la comunicación con Figma
-- Permite a Claude "unirse" a canales específicos para interactuar con diferentes instancias de Figma
+- Se conecta a canales concretos para hablar con Figma
+- Claude puede unirse a un canal por cada instancia de Figma
 
 ## 📊 Características Avanzadas
 
-- **Procesamiento por Lotes**: Las operaciones que involucran múltiples nodos (como el reemplazo de texto) se procesan en lotes para mejorar el rendimiento
-- **Informes de Progreso**: Para operaciones largas, proporciona actualizaciones de progreso
-- **Reconexión Inteligente**: El sistema maneja automáticamente la reconexión cuando se interrumpe la comunicación WebSocket
+- **Procesamiento por Lotes**: Las operaciones sobre muchos nodos (como reemplazar texto) van por lotes
+- **Informes de Progreso**: Las operaciones largas informan de su avance
+- **Reconexión**: Si el WebSocket cae, el sistema reconecta solo
 
 ## 🖥️ Uso Práctico
 
-Este sistema permite escenarios como:
+El sistema sirve para:
 1. Analizar diseños existentes de Figma
-2. Crear nuevos diseños basados en instrucciones en lenguaje natural
+2. Crear diseños desde instrucciones en lenguaje natural
 3. Modificar textos y estilos en todo un documento
 4. Extraer información estructurada de diseños de Figma
 5. Hacer cambios específicos en elementos de diseño seleccionados
 
 ## 🚀 Mejores Usos para Claude
 
-1. **Creación de Prototipos**: Crear rápidamente prototipos de UI basados en descripciones
-2. **Modificación por Lotes**: Actualizar múltiples elementos de texto o estilos manteniendo la coherencia
-3. **Análisis de Diseño**: Extraer información estructurada sobre componentes de UI y sus relaciones
-4. **Transformación de Texto**: Localizar interfaces o adaptar contenido para diferentes audiencias
-5. **Optimización de Diseño**: Sugerir mejoras basadas en principios de diseño y accesibilidad
+1. **Prototipos**: Prototipos de UI rápidos desde descripciones
+2. **Cambios por Lotes**: Actualizar muchos textos o estilos sin perder coherencia
+3. **Análisis de Diseño**: Extraer información estructurada de los componentes de UI y sus relaciones
+4. **Texto**: Traducir interfaces o adaptar contenido a otros públicos
+5. **Mejoras de Diseño**: Sugerir cambios desde principios de diseño y accesibilidad
 
 ## 🛠️ Limitaciones Técnicas
 
-1. **Complejidad de Respuesta**: Las respuestas complejas de Figma necesitan filtrado para ser manejables
-2. **Rendimiento**: Las operaciones masivas pueden ser lentas y requieren procesamiento por lotes
-3. **Sincronización**: Posibles desafíos con cambios concurrentes en el documento de Figma
-4. **Tiempo de Respuesta**: Las operaciones que involucran muchos nodos pueden tener latencia alta
-5. **Tipos de Nodos**: No todos los tipos de nodos de Figma (como vectores) son completamente compatibles
+1. **Respuestas**: Las respuestas grandes de Figma piden filtrado
+2. **Rendimiento**: Las operaciones masivas son lentas y van por lotes
+3. **Sincronización**: Los cambios concurrentes en el documento pueden chocar
+4. **Latencia**: Muchas operaciones sobre muchos nodos tardan
+5. **Tipos de Nodos**: No todos los nodos de Figma (como vectores) están cubiertos

@@ -2,14 +2,14 @@
 
 ## 📋 RESUMEN EJECUTIVO
 
-**Claude Talk to Figma MCP** es un sistema de integración avanzado que permite a Claude Desktop interactuar directamente con Figma a través del protocolo Model Context Protocol (MCP). El proyecto implementa una arquitectura de microservicios distribuida con comunicación WebSocket bidireccional, diseñada para facilitar flujos de trabajo de diseño asistido por IA.
+**Claude Talk to Figma MCP** deja a Claude Desktop manejar Figma a través del Model Context Protocol (MCP). El proyecto usa microservicios con WebSocket en ambos sentidos, para diseñar con ayuda de la IA.
 
 ### Métricas del Proyecto
 - **Líneas de código**: ~8,000+ líneas
 - **Archivos TypeScript**: 15+ archivos
 - **Herramientas MCP**: 40+ comandos especializados
-- **Cobertura de funcionalidad**: Completa (CRUD + Análisis)
-- **Arquitectura**: Microservicios con separación clara de responsabilidades
+- **Cobertura**: Completa (CRUD + análisis)
+- **Arquitectura**: Microservicios, cada uno con su trabajo
 
 ---
 
@@ -44,14 +44,14 @@ graph TB
 
 #### Principios Arquitectónicos Implementados
 
-1. **Separation of Concerns**: Cada capa tiene responsabilidades específicas
+1. **Separation of Concerns**: Cada capa tiene su trabajo
    - MCP Server: Lógica de negocio, validación, defaults
    - WebSocket Server: Enrutamiento de mensajes
    - Figma Plugin: Traductor puro de comandos
 
-2. **Single Responsibility Principle**: Cada módulo tiene una función específica
-3. **Dependency Inversion**: Abstracciones bien definidas entre capas
-4. **Event-Driven Architecture**: Comunicación asíncrona con manejo de eventos
+2. **Single Responsibility Principle**: Cada módulo hace una cosa
+3. **Dependency Inversion**: Abstracciones claras entre capas
+4. **Event-Driven Architecture**: Comunicación asíncrona por eventos
 
 ### 2. Estructura Modular del Proyecto
 
@@ -89,7 +89,7 @@ src/
 
 ✅ **Tipado Estricto con TypeScript**
 ```typescript
-// Ejemplo de tipado robusto
+// Tipado
 export interface CommandProgressUpdate {
   type: 'command_progress';
   commandId: string;
@@ -106,7 +106,7 @@ export interface CommandProgressUpdate {
 
 ✅ **Validación con Zod**
 ```typescript
-// Validación robusta de parámetros
+// Validación de parámetros
 server.tool(
   "set_fill_color",
   "Set the fill color of a node in Figma",
@@ -122,7 +122,7 @@ server.tool(
 
 ✅ **Manejo de Errores Robusto**
 ```typescript
-// Patrón de error handling consistente
+// Patrón de manejo de errores
 try {
   const result = await sendCommandToFigma("get_document_info");
   return { content: [{ type: "text", text: JSON.stringify(result) }] };
@@ -138,7 +138,7 @@ try {
 
 ✅ **Sistema de Logging Estructurado**
 ```typescript
-// Logger personalizado que evita interferir con stdout
+// Logger que no toca stdout
 export const logger = {
   info: (message: string) => process.stderr.write(`[INFO] ${message}\n`),
   debug: (message: string) => process.stderr.write(`[DEBUG] ${message}\n`),
@@ -152,21 +152,21 @@ export const logger = {
 ⚠️ **Plugin de Figma Monolítico**
 - **Problema**: 3,296 líneas en un solo archivo `code.js`
 - **Impacto**: Difícil mantenimiento, testing complejo, violación SRP
-- **Recomendación**: Refactorizar en módulos especializados
+- **Recomendación**: Partirlo en módulos
 
 ⚠️ **Falta de Abstracción en Comunicación WebSocket**
-- **Problema**: Lógica de WebSocket mezclada con lógica de negocio
-- **Recomendación**: Implementar patrón Repository/Service
+- **Problema**: La lógica de WebSocket se mezcla con la de negocio
+- **Recomendación**: Patrón Repository/Service
 
 ⚠️ **Testing Limitado**
-- **Cobertura actual**: Principalmente tests de integración
-- **Faltante**: Tests unitarios, mocks robustos, tests de performance
+- **Cobertura actual**: Sobre todo tests de integración
+- **Falta**: Tests unitarios, buenos mocks, tests de rendimiento
 
 ### 4. Implementación de Patrones de Diseño
 
 #### Patrón Command ✅
 ```typescript
-// Cada herramienta MCP implementa el patrón Command
+// Cada herramienta MCP usa el patrón Command
 async function handleCommand(command, params) {
   switch (command) {
     case "create_rectangle":
@@ -184,14 +184,14 @@ async function handleCommand(command, params) {
 ws.on('message', (data) => {
   const json = JSON.parse(data) as ProgressMessage;
   if (json.type === 'progress_update') {
-    // Manejo de actualizaciones de progreso
+    // Actualizaciones de progreso
   }
 });
 ```
 
 #### Patrón Factory ✅
 ```typescript
-// Factory para registro de herramientas
+// Factory de registro de herramientas
 export function registerTools(server: McpServer): void {
   registerDocumentTools(server);
   registerCreationTools(server);
@@ -210,7 +210,7 @@ export function registerTools(server: McpServer): void {
    - Sanitización de parámetros
 
 2. **Manejo Seguro de WebSockets**
-   - Timeouts para prevenir ataques de DoS
+   - Timeouts contra ataques de DoS
    - Límites de reconexión
 
 3. **Configuración de CORS**
@@ -224,9 +224,9 @@ export function registerTools(server: McpServer): void {
 
 #### Vulnerabilidades Identificadas ⚠️
 
-1. **CORS Permisivo**: `Access-Control-Allow-Origin: "*"` demasiado amplio
-2. **Falta de Autenticación**: No hay sistema de autenticación entre componentes
-3. **Rate Limiting**: No implementado en el servidor WebSocket
+1. **CORS Permisivo**: `Access-Control-Allow-Origin: "*"` abre demasiado
+2. **Falta de Autenticación**: Los componentes no se autentican entre sí
+3. **Rate Limiting**: El servidor WebSocket no lo tiene
 
 ### 6. Análisis de Performance
 
@@ -234,7 +234,7 @@ export function registerTools(server: McpServer): void {
 
 1. **Chunking para Operaciones Masivas**
    ```typescript
-   // Procesamiento en chunks para operaciones grandes
+   // Chunks para operaciones grandes
    const CHUNK_SIZE = 10;
    for (let i = 0; i < nodeIds.length; i += CHUNK_SIZE) {
      const chunk = nodeIds.slice(i, i + CHUNK_SIZE);
@@ -254,9 +254,9 @@ export function registerTools(server: McpServer): void {
 
 #### Cuellos de Botella Potenciales ⚠️
 
-1. **Serialización JSON**: Objetos grandes de Figma pueden ser costosos
-2. **Falta de Pooling**: Conexiones WebSocket no reutilizadas
-3. **Sin Caché**: Respuestas no cacheadas
+1. **Serialización JSON**: Los objetos grandes de Figma cuestan
+2. **Falta de Pooling**: Las conexiones WebSocket no se reutilizan
+3. **Sin Caché**: Las respuestas no se guardan
 
 ---
 
@@ -274,7 +274,7 @@ export function registerTools(server: McpServer): void {
 
 ### Patrón de Implementación Consistente
 
-Todas las herramientas siguen el mismo patrón:
+Todas las herramientas siguen un patrón:
 
 ```typescript
 server.tool(
@@ -310,17 +310,17 @@ server.tool(
 
 | Componente | Tecnología | Versión | Justificación |
 |------------|------------|---------|---------------|
-| **Runtime** | Bun | v1.0+ | Performance superior a Node.js |
+| **Runtime** | Bun | v1.0+ | Más rápido que Node.js |
 | **Lenguaje** | TypeScript | v5.8.3 | Tipado estático, mejor DX |
 | **Validación** | Zod | v3.22.4 | Validación runtime type-safe |
 | **Comunicación** | WebSocket | WS v8.16.0 | Comunicación bidireccional |
-| **Testing** | Jest | v29.7.0 | Framework de testing robusto |
-| **Build** | tsup | v8.4.0 | Bundler optimizado para TypeScript |
+| **Testing** | Jest | v29.7.0 | Framework de testing sólido |
+| **Build** | tsup | v8.4.0 | Bundler para TypeScript |
 
 ### Configuración de Build
 
 ```typescript
-// tsup.config.ts - Configuración optimizada
+// tsup.config.ts
 export default defineConfig({
   entry: ['src/talk_to_figma_mcp/server.ts', 'src/socket.ts'],
   format: ['cjs', 'esm'],      // Dual format para compatibilidad
@@ -353,7 +353,7 @@ export default defineConfig({
 
 #### Tests de Integración ✅
 ```typescript
-// Ejemplo de test robusto con mocking
+// Test con mocking
 describe("set_fill_color tool integration", () => {
   beforeEach(() => {
     mockSendCommand = require('../../src/talk_to_figma_mcp/utils/websocket').sendCommandToFigma;
@@ -386,10 +386,10 @@ module.exports = {
 
 ### Gaps en Testing ⚠️
 
-1. **Falta de Tests Unitarios**: Solo tests de integración
-2. **Sin Tests de Performance**: No hay benchmarks
-3. **Cobertura Limitada**: No cubre edge cases complejos
-4. **Falta de Tests E2E**: No hay tests end-to-end completos
+1. **Sin Tests Unitarios**: Solo hay de integración
+2. **Sin Tests de Rendimiento**: No hay benchmarks
+3. **Cobertura Corta**: No cubre los casos límite difíciles
+4. **Sin Tests E2E**: No hay tests de extremo a extremo
 
 ---
 
@@ -446,7 +446,7 @@ interface AuthService {
 
 #### 2.2 Rate Limiting
 ```typescript
-// Rate limiting implementation
+// Rate limiting
 class RateLimiter {
   private requests: Map<string, number[]> = new Map();
   
@@ -511,14 +511,14 @@ interface TracingService {
 ### Corto Plazo (1 mes)
 
 1. **Refactorizar Plugin de Figma** en módulos especializados
-2. **Implementar Circuit Breaker** para resilencia
+2. **Implementar Circuit Breaker** para aguantar fallos
 3. **Añadir Métricas de Performance** 
 4. **Crear Tests E2E** automatizados
 
 ### Largo Plazo (3 meses)
 
 1. **Migrar a Arquitectura Hexagonal** completa
-2. **Implementar Event Sourcing** para auditabilidad
+2. **Implementar Event Sourcing** para poder auditar
 3. **Añadir Support Multi-tenant**
 4. **Crear Dashboard de Monitoreo**
 
@@ -528,30 +528,30 @@ interface TracingService {
 
 ### Fortalezas del Proyecto
 
-✅ **Arquitectura Sólida**: Separación clara de responsabilidades
+✅ **Arquitectura Sólida**: Cada parte con su trabajo
 ✅ **Tipado Robusto**: TypeScript con validación Zod
-✅ **Comunicación Eficiente**: WebSocket bidireccional
+✅ **Comunicación Eficiente**: WebSocket en ambos sentidos
 ✅ **Funcionalidad Completa**: 40+ herramientas MCP
-✅ **Error Handling**: Manejo robusto de errores
-✅ **Performance**: Optimizaciones implementadas
+✅ **Error Handling**: Los errores se manejan bien
+✅ **Rendimiento**: Ya optimizado
 
 ### Áreas Críticas de Mejora
 
-⚠️ **Plugin Monolítico**: Necesita refactoring urgente
-⚠️ **Seguridad**: Falta autenticación y rate limiting
-⚠️ **Testing**: Cobertura insuficiente
-⚠️ **Observabilidad**: Falta monitoreo avanzado
+⚠️ **Plugin Monolítico**: Pide refactoring ya
+⚠️ **Seguridad**: Sin autenticación ni rate limiting
+⚠️ **Testing**: Cobertura corta
+⚠️ **Observabilidad**: Poco monitoreo
 
 ### Calificación General
 
-**Arquitectura**: 8/10 - Sólida pero necesita refinamiento
-**Código**: 7/10 - Buena calidad con áreas de mejora
-**Seguridad**: 6/10 - Básica, necesita fortalecimiento
-**Performance**: 8/10 - Bien optimizada
-**Testing**: 6/10 - Limitado pero funcional
-**Mantenibilidad**: 7/10 - Buena estructura, plugin problemático
+**Arquitectura**: 8/10 - Sólida, con trabajo por delante
+**Código**: 7/10 - Buena calidad, mejorable
+**Seguridad**: 6/10 - Básica, hay que reforzarla
+**Rendimiento**: 8/10 - Bien optimizado
+**Testing**: 6/10 - Corto pero funciona
+**Mantenibilidad**: 7/10 - Buena estructura; el plugin, no
 
-**Puntuación Global: 7.2/10** - Proyecto sólido con potencial de excelencia tras las mejoras recomendadas.
+**Puntuación Global: 7.2/10** - Proyecto sólido; con las mejoras, excelente.
 
 ---
 
