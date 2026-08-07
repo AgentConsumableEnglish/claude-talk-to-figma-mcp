@@ -1,16 +1,7 @@
-/**
- * This module contains all the prompts used by the Figma MCP server.
- * Prompts provide guidance to Claude on how to work with Figma designs effectively.
- */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-/**
- * Register all prompts with the MCP server
- * @param server - The MCP server instance
- */
 export function registerPrompts(server: McpServer): void {
-  // Design Strategy Prompt
   server.prompt(
     "design_strategy",
     "Best practices for working with Figma designs",
@@ -98,7 +89,6 @@ Example Login Screen Structure:
     }
   );
 
-  // Read Design Strategy Prompt
   server.prompt(
     "read_design_strategy",
     "Best practices for reading Figma designs",
@@ -127,7 +117,6 @@ Example Login Screen Structure:
     }
   );
 
-  // Text Replacement Strategy Prompt
   server.prompt(
     "text_replacement_strategy",
     "Systematic approach for replacing text in Figma designs",
@@ -262,14 +251,11 @@ Remember that text is never just text—it's a core design element that must wor
   );
 }
 
-// Export individual prompt registration functions
 export function registerDesignStrategyPrompt(server: McpServer): void {
   server.prompt(
     "design_strategy",
     "Best practices for working with Figma designs",
     (extra) => {
-      // Implementation is the same as above
-      // This function is exported for individual usage if needed
     }
   );
 }
@@ -279,8 +265,6 @@ export function registerReadDesignStrategyPrompt(server: McpServer): void {
     "read_design_strategy",
     "Best practices for reading Figma designs",
     (extra) => {
-      // Implementation is the same as above
-      // This function is exported for individual usage if needed
     }
   );
 }
@@ -290,8 +274,6 @@ export function registerTextReplacementStrategyPrompt(server: McpServer): void {
     "text_replacement_strategy",
     "Systematic approach for replacing text in Figma designs",
     (extra) => {
-      // Implementation is the same as above
-      // This function is exported for individual usage if needed
     }
   );
 }

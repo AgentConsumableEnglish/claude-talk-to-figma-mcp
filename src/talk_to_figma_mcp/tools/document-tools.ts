@@ -3,12 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { sendCommandToFigma, joinChannel } from "../utils/websocket.js";
 import { filterFigmaNode } from "../utils/figma-helpers.js";
 
-/**
- * Register document-related tools to the MCP server
- * @param server - The MCP server instance
- */
 export function registerDocumentTools(server: McpServer): void {
-  // Document Info Tool
   server.tool(
     "get_document_info",
     "Get detailed information about the current Figma document",
@@ -37,7 +32,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Selection Tool
   server.tool(
     "get_selection",
     "Get information about the current selection in Figma",
@@ -66,7 +60,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Node Info Tool
   server.tool(
     "get_node_info",
     "Get detailed information about a specific node in Figma",
@@ -97,7 +90,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Nodes Info Tool
   server.tool(
     "get_nodes_info",
     "Get detailed information about multiple nodes in Figma",
@@ -133,7 +125,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Get Styles Tool
   server.tool(
     "get_styles",
     "Get all styles from the current Figma document",
@@ -162,7 +153,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Get Local Components Tool
   server.tool(
     "get_local_components",
     "Get all local components from the Figma document",
@@ -191,7 +181,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Get Remote Components Tool
   server.tool(
     "get_remote_components",
     "Get available components from team libraries in Figma",
@@ -220,7 +209,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Text Node Scanning Tool
   server.tool(
     "scan_text_nodes",
     "Scan all text nodes in the selected Figma node",
@@ -229,20 +217,17 @@ export function registerDocumentTools(server: McpServer): void {
     },
     async ({ nodeId }) => {
       try {
-        // Initial response to indicate we're starting the process
         const initialStatus = {
           type: "text" as const,
           text: "Starting text node scanning. This may take a moment for large designs...",
         };
 
-        // Use the plugin's scan_text_nodes function with chunking flag
         const result = await sendCommandToFigma("scan_text_nodes", {
           nodeId,
-          useChunking: true,  // Enable chunking on the plugin side
-          chunkSize: 10       // Process 10 nodes at a time
+          useChunking: true,
+          chunkSize: 10
         });
 
-        // If the result indicates chunking was used, format the response accordingly
         if (result && typeof result === 'object' && 'chunks' in result) {
           const typedResult = result as {
             success: boolean,
@@ -273,7 +258,6 @@ export function registerDocumentTools(server: McpServer): void {
           };
         }
 
-        // If chunking wasn't used or wasn't reported in the result format, return the result as is
         return {
           content: [
             initialStatus,
@@ -296,7 +280,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Join Channel Tool
   server.tool(
     "join_channel",
     "Join a specific channel to communicate with Figma",
@@ -306,7 +289,6 @@ export function registerDocumentTools(server: McpServer): void {
     async ({ channel }) => {
       try {
         if (!channel) {
-          // If no channel provided, ask the user for input
           return {
             content: [
               {
@@ -321,7 +303,6 @@ export function registerDocumentTools(server: McpServer): void {
           };
         }
 
-        // Use joinChannel instead of sendCommandToFigma to ensure currentChannel is updated
         await joinChannel(channel);
 
         return {
@@ -345,7 +326,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Export Node as Image Tool
   server.tool(
     "export_node_as_image",
     "Export a node as an image from Figma",
@@ -363,7 +343,7 @@ export function registerDocumentTools(server: McpServer): void {
           nodeId,
           format: format || "PNG",
           scale: scale || 1,
-        }, 120000); // 120 second timeout for image export
+        }, 120000);
         const typedResult = result as { imageData: string; mimeType: string };
 
         return {
@@ -388,7 +368,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Create Page Tool
   server.tool(
     "create_page",
     "Create a new page in the current Figma document",
@@ -420,7 +399,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Delete Page Tool
   server.tool(
     "delete_page",
     "Delete a page from the current Figma document",
@@ -452,7 +430,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Rename Page Tool
   server.tool(
     "rename_page",
     "Rename an existing page in the Figma document",
@@ -485,7 +462,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Get Pages Tool
   server.tool(
     "get_pages",
     "Get all pages in the current Figma document",
@@ -514,7 +490,6 @@ export function registerDocumentTools(server: McpServer): void {
     }
   );
 
-  // Set Current Page Tool
   server.tool(
     "set_current_page",
     "Switch to a specific page in the Figma document",

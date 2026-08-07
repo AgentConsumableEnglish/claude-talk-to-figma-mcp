@@ -2,13 +2,7 @@ import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { sendCommandToFigma } from "../utils/websocket";
 
-/**
- * Register text-related tools to the MCP server
- * This module contains tools for working with text elements in Figma
- * @param server - The MCP server instance
- */
 export function registerTextTools(server: McpServer): void {
-  // Set Text Content Tool
   server.tool(
     "set_text_content",
     "Set the text content of an existing text node in Figma",
@@ -44,7 +38,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Multiple Text Contents Tool
   server.tool(
     "set_multiple_text_contents",
     "Set multiple text contents parallelly in a node",
@@ -74,23 +67,19 @@ export function registerTextTools(server: McpServer): void {
           };
         }
 
-        // Initial response to indicate we're starting the process
         const initialStatus = {
           type: "text" as const,
           text: `Starting text replacement for ${text.length} nodes. This will be processed in batches of 5...`,
         };
 
-        // Track overall progress
         let totalProcessed = 0;
         const totalToProcess = text.length;
 
-        // Use the plugin's set_multiple_text_contents function with chunking
         const result = await sendCommandToFigma("set_multiple_text_contents", {
           nodeId,
           text,
         });
 
-        // Cast the result to a specific type to work with it safely
         interface TextReplaceResult {
           success: boolean;
           nodeId: string;
@@ -109,7 +98,6 @@ export function registerTextTools(server: McpServer): void {
 
         const typedResult = result as TextReplaceResult;
 
-        // Format the results for display
         const success = typedResult.replacementsApplied && typedResult.replacementsApplied > 0;
         const progressText = `
         Text replacement completed:
@@ -118,11 +106,9 @@ export function registerTextTools(server: McpServer): void {
         - Processed in ${typedResult.completedInChunks || 1} batches
         `;
 
-        // Detailed results
         const detailedResults = typedResult.results || [];
         const failedResults = detailedResults.filter(item => !item.success);
 
-        // Create the detailed part of the response
         let detailedResponse = "";
         if (failedResults.length > 0) {
           detailedResponse = `\n\nNodes that failed:\n${failedResults.map(item =>
@@ -152,7 +138,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Font Name Tool
   server.tool(
     "set_font_name",
     "Set the font name and style of a text node in Figma",
@@ -190,7 +175,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Font Size Tool
   server.tool(
     "set_font_size",
     "Set the font size of a text node in Figma",
@@ -226,7 +210,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Font Weight Tool
   server.tool(
     "set_font_weight",
     "Set the font weight of a text node in Figma",
@@ -262,7 +245,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Letter Spacing Tool
   server.tool(
     "set_letter_spacing",
     "Set the letter spacing of a text node in Figma",
@@ -300,7 +282,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Line Height Tool
   server.tool(
     "set_line_height",
     "Set the line height of a text node in Figma",
@@ -338,7 +319,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Paragraph Spacing Tool
   server.tool(
     "set_paragraph_spacing",
     "Set the paragraph spacing of a text node in Figma",
@@ -374,7 +354,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Text Case Tool
   server.tool(
     "set_text_case",
     "Set the text case of a text node in Figma",
@@ -410,7 +389,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Text Decoration Tool
   server.tool(
     "set_text_decoration",
     "Set the text decoration of a text node in Figma",
@@ -446,7 +424,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Get Styled Text Segments Tool
   server.tool(
     "get_styled_text_segments",
     "Get text segments with specific styling in a text node",
@@ -493,7 +470,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Set Text Style ID Tool
   server.tool(
     "set_text_style_id",
     "Apply a text style to a text node in Figma",
@@ -529,7 +505,6 @@ export function registerTextTools(server: McpServer): void {
     }
   );
 
-  // Load Font Async Tool
   server.tool(
     "load_font_async",
     "Load a font asynchronously in Figma",

@@ -49,7 +49,6 @@ describe("set_stroke_color tool integration", () => {
         r: 0.2,
         g: 0.4,
         b: 0.6,
-        // a is undefined
         strokeWeight: 2,
       });
 
@@ -72,7 +71,7 @@ describe("set_stroke_color tool integration", () => {
         r: 0.1,
         g: 0.3,
         b: 0.5,
-        a: 0, // This should be preserved as 0, not converted to 1
+        a: 0,
         strokeWeight: 1.5,
       });
 
@@ -111,12 +110,11 @@ describe("set_stroke_color tool integration", () => {
         g: 0.5,
         b: 0.5,
         a: 1,
-        // strokeWeight is undefined
       });
 
       expect(mockSendCommand).toHaveBeenCalledTimes(1);
       const [command, payload] = mockSendCommand.mock.calls[0];
-      expect(payload.strokeWeight).toBe(1); // Should default to 1
+      expect(payload.strokeWeight).toBe(1);
       expect(response.content[0].text).toContain("weight 1");
     });
 
@@ -248,7 +246,6 @@ describe("set_stroke_color tool integration", () => {
     it("rejects undefined r component", async () => {
       await expect(callToolWithValidation({
         nodeId: "nodeI1",
-        // r is missing
         g: 0.5,
         b: 0.8,
         a: 1,
@@ -262,7 +259,6 @@ describe("set_stroke_color tool integration", () => {
       await expect(callToolWithValidation({
         nodeId: "nodeI2",
         r: 0.5,
-        // g is missing
         b: 0.8,
         a: 1,
         strokeWeight: 1,
@@ -276,7 +272,6 @@ describe("set_stroke_color tool integration", () => {
         nodeId: "nodeI3",
         r: 0.5,
         g: 0.8,
-        // b is missing
         a: 1,
         strokeWeight: 1,
       })).rejects.toThrow();
@@ -320,7 +315,7 @@ describe("set_stroke_color tool integration", () => {
         g: 0.5,
         b: 0.5,
         a: 1,
-        strokeWeight: "thick", // Invalid type
+        strokeWeight: "thick",
       })).rejects.toThrow();
       
       expect(mockSendCommand).not.toHaveBeenCalled();
@@ -329,7 +324,7 @@ describe("set_stroke_color tool integration", () => {
     it("rejects out-of-range color values", async () => {
       await expect(callToolWithValidation({
         nodeId: "nodeI7",
-        r: 1.5, // Out of 0-1 range
+        r: 1.5,
         g: 0.5,
         b: 0.8,
         a: 1,
@@ -342,7 +337,7 @@ describe("set_stroke_color tool integration", () => {
     it("rejects negative color values", async () => {
       await expect(callToolWithValidation({
         nodeId: "nodeI8",
-        r: -0.1, // Negative value
+        r: -0.1,
         g: 0.5,
         b: 0.8,
         a: 1,
@@ -410,12 +405,11 @@ describe("set_stroke_color tool integration", () => {
         r: 0.8,
         g: 0.2,
         b: 0.4,
-        // Both a and strokeWeight are undefined, should get defaults
       });
 
       const [command, payload] = mockSendCommand.mock.calls[0];
-      expect(payload.color.a).toBe(1); // Default opacity
-      expect(payload.strokeWeight).toBe(1); // Default weight
+      expect(payload.color.a).toBe(1);
+      expect(payload.strokeWeight).toBe(1);
       expect(response.content[0].text).toContain("RGBA(0.8, 0.2, 0.4, 1)");
       expect(response.content[0].text).toContain("weight 1");
     });

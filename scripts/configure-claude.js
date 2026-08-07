@@ -6,16 +6,13 @@ import os from 'os';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
-// Get current file directory (ES modules don't have __dirname)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Determine the location of Claude Desktop configuration file
 const configPath = os.platform() === 'darwin' 
   ? path.join(os.homedir(), 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json')
   : path.join(os.homedir(), 'AppData', 'Roaming', 'Claude', 'claude_desktop_config.json');
 
-// Get the absolute path of package.json
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const packageName = packageJson.name;
@@ -23,7 +20,6 @@ const packageVersion = packageJson.version;
 
 console.log(`Configuring Claude Desktop for ${packageName} v${packageVersion}...`);
 
-// Create backups
 function backupFile(filePath) {
   if (fs.existsSync(filePath)) {
     const backupPath = `${filePath}.backup-${Date.now()}`;
@@ -32,7 +28,6 @@ function backupFile(filePath) {
   }
 }
 
-// Read existing configuration or create new one
 let config = {};
 try {
   if (fs.existsSync(configPath)) {
@@ -42,7 +37,6 @@ try {
   } else {
     console.log('No existing configuration found. Creating new one.');
     
-    // Create required directories if they don't exist
     const configDir = path.dirname(configPath);
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true });
@@ -54,7 +48,6 @@ try {
   console.error('Creating new configuration.');
 }
 
-// Check if bun is installed
 let useBun = false;
 try {
   execSync('bun --version', { stdio: 'ignore' });
@@ -64,7 +57,6 @@ try {
   console.log('Bun is not installed. Using npx as an alternative.');
 }
 
-// Add MCP configuration
 config.mcpServers = config.mcpServers || {};
 config.mcpServers['ClaudeTalkToFigma'] = {
   command: 'npx',
@@ -74,7 +66,6 @@ config.mcpServers['ClaudeTalkToFigma'] = {
 console.log('Updated configuration for ClaudeTalkToFigma:');
 console.log(JSON.stringify(config.mcpServers['ClaudeTalkToFigma'], null, 2));
 
-// Write configuration
 try {
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
   console.log(`Configuration saved to ${configPath}`);

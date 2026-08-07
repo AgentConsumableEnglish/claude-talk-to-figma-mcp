@@ -2,13 +2,7 @@ import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { sendCommandToFigma } from "../utils/websocket";
 
-/**
- * Register component-related tools to the MCP server
- * This module contains tools for working with components in Figma
- * @param server - The MCP server instance
- */
 export function registerComponentTools(server: McpServer): void {
-  // Create Component Instance Tool
   server.tool(
     "create_component_instance",
     "Create an instance of a component in Figma",
@@ -46,7 +40,6 @@ export function registerComponentTools(server: McpServer): void {
     }
   );
 
-  // Create Component from Node Tool
   server.tool(
     "create_component_from_node",
     "Convert an existing node (frame, group, etc.) into a reusable component in Figma",
@@ -82,7 +75,6 @@ export function registerComponentTools(server: McpServer): void {
     }
   );
 
-  // Create Component Set from Components Tool
   server.tool(
     "create_component_set",
     "Create a component set (variants) from multiple component nodes in Figma",

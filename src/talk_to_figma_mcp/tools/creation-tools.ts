@@ -2,13 +2,7 @@ import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { sendCommandToFigma } from "../utils/websocket";
 
-/**
- * Register creation tools to the MCP server
- * This module contains tools for creating various shapes and elements in Figma
- * @param server - The MCP server instance
- */
 export function registerCreationTools(server: McpServer): void {
-  // Create Rectangle Tool
   server.tool(
     "create_rectangle",
     "Create a new rectangle in Figma",
@@ -54,7 +48,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Create Frame Tool
   server.tool(
     "create_frame",
     "Create a new frame in Figma",
@@ -143,7 +136,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Create Text Tool
   server.tool(
     "create_text",
     "Create a new text element in Figma",
@@ -213,7 +205,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Create Ellipse Tool
   server.tool(
     "create_ellipse",
     "Create a new ellipse in Figma",
@@ -280,7 +271,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Create Polygon Tool
   server.tool(
     "create_polygon",
     "Create a new polygon in Figma",
@@ -349,7 +339,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Create Star Tool
   server.tool(
     "create_star",
     "Create a new star in Figma",
@@ -420,7 +409,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Group Nodes Tool
   server.tool(
     "group_nodes",
     "Group nodes in Figma",
@@ -463,7 +451,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Ungroup Nodes Tool
   server.tool(
     "ungroup_nodes",
     "Ungroup nodes in Figma",
@@ -501,7 +488,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Clone Node Tool
   server.tool(
     "clone_node",
     "Clone an existing node in Figma",
@@ -535,7 +521,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Insert Child Tool
   server.tool(
     "insert_child",
     "Insert a child node inside a parent node in Figma",
@@ -580,7 +565,6 @@ export function registerCreationTools(server: McpServer): void {
     }
   );
 
-  // Flatten Node Tool
   server.tool(
     "flatten_node",
     "Flatten a node in Figma (e.g., for boolean operations or converting to path)",

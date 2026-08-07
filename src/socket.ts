@@ -1,6 +1,5 @@
 import { Server, ServerWebSocket } from "bun";
 
-// Enhanced logging system
 const logger = {
   info: (message: string, ...args: any[]) => {
     console.log(`[INFO] ${message}`, ...args);
@@ -16,10 +15,8 @@ const logger = {
   }
 };
 
-// Store clients by channel
 const channels = new Map<string, Set<ServerWebSocket<any>>>();
 
-// Keep track of channel statistics
 const stats = {
   totalConnections: 0,
   activeConnections: 0,
@@ -29,18 +26,14 @@ const stats = {
 };
 
 function handleConnection(ws: ServerWebSocket<any>) {
-  // Track connection statistics
   stats.totalConnections++;
   stats.activeConnections++;
   
-  // Assign a unique client ID for better tracking
   const clientId = `client_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   ws.data = { clientId };
   
-  // Don't add to clients immediately - wait for channel join
   logger.info(`New client connected: ${clientId}`);
 
-  // Send welcome message to the new client
   try {
     ws.send(JSON.stringify({
       type: "system",
@@ -55,13 +48,11 @@ function handleConnection(ws: ServerWebSocket<any>) {
     logger.info(`Client disconnected: ${clientId}`);
     stats.activeConnections--;
 
-    // Remove client from their channel
     channels.forEach((clients, channelName) => {
       if (clients.has(ws)) {
         clients.delete(ws);
         logger.debug(`Removed client ${clientId} from channel: ${channelName}`);
 
-        // Notify other clients in same channel
         try {
           clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
@@ -84,15 +75,11 @@ function handleConnection(ws: ServerWebSocket<any>) {
 
 const server = Bun.serve({
   port: 3055,
-  // uncomment this to allow connections in windows wsl
-  // hostname: "0.0.0.0",
   fetch(req: Request, server: Server) {
     const url = new URL(req.url);
     
-    // Log incoming requests
     logger.debug(`Received ${req.method} request to ${url.pathname}`);
     
-    // Handle CORS preflight
     if (req.method === "OPTIONS") {
       return new Response(null, {
         headers: {
@@ -103,7 +90,6 @@ const server = Bun.serve({
       });
     }
 
-    // Handle status endpoint
     if (url.pathname === "/status") {
       return new Response(JSON.stringify({
         status: "running",
@@ -117,7 +103,6 @@ const server = Bun.serve({
       });
     }
 
-    // Handle WebSocket upgrade
     try {
       const success = server.upgrade(req, {
         headers: {
@@ -126,7 +111,7 @@ const server = Bun.serve({
       });
 
       if (success) {
-        return; // Upgraded to WebSocket
+        return;
       }
     } catch (error) {
       logger.error("Failed to upgrade WebSocket connection:", error);
@@ -134,7 +119,6 @@ const server = Bun.serve({
       return new Response("Failed to upgrade to WebSocket", { status: 500 });
     }
 
-    // Return response for non-WebSocket requests
     return new Response("Claude to Figma WebSocket server running. Try connecting with a WebSocket client.", {
       headers: {
         "Content-Type": "text/plain",
@@ -164,18 +148,15 @@ const server = Bun.serve({
             return;
           }
 
-          // Create channel if it doesn't exist
           if (!channels.has(channelName)) {
             logger.info(`Creating new channel: ${channelName}`);
             channels.set(channelName, new Set());
           }
 
-          // Add client to channel
           const channelClients = channels.get(channelName)!;
           channelClients.add(ws);
           logger.info(`Client ${clientId} joined channel: ${channelName}`);
 
-          // Notify client they joined successfully
           try {
             ws.send(JSON.stringify({
               type: "system",
@@ -200,7 +181,6 @@ const server = Bun.serve({
             stats.errors++;
           }
 
-          // Notify other clients in channel
           try {
             let notificationCount = 0;
             channelClients.forEach((client) => {
@@ -225,7 +205,6 @@ const server = Bun.serve({
           return;
         }
 
-        // Handle regular messages
         if (data.type === "message") {
           const channelName = data.channel;
           if (!channelName || typeof channelName !== "string") {
@@ -249,7 +228,6 @@ const server = Bun.serve({
             return;
           }
 
-          // Broadcast to all clients in the channel
           try {
             let broadcastCount = 0;
             channelClients.forEach((client) => {
@@ -272,7 +250,6 @@ const server = Bun.serve({
           }
         }
         
-        // Handle progress updates
         if (data.type === "progress_update") {
           const channelName = data.channel;
           if (!channelName || typeof channelName !== "string") {
@@ -288,7 +265,6 @@ const server = Bun.serve({
 
           logger.debug(`Progress update for command ${data.id} in channel ${channelName}: ${data.message?.data?.status || 'unknown'} - ${data.message?.data?.progress || 0}%`);
           
-          // Broadcast progress update to all clients in the channel
           try {
             channelClients.forEach((client) => {
               if (client.readyState === WebSocket.OPEN) {
@@ -306,7 +282,6 @@ const server = Bun.serve({
         stats.errors++;
         logger.error("Error handling message:", err);
         try {
-          // Send error back to client
           ws.send(JSON.stringify({
             type: "error",
             message: "Error processing your message: " + (err instanceof Error ? err.message : String(err))
@@ -321,7 +296,6 @@ const server = Bun.serve({
       const clientId = ws.data?.clientId || "unknown";
       logger.info(`WebSocket closed for client ${clientId}: Code ${code}, Reason: ${reason || 'No reason provided'}`);
       
-      // Remove client from their channel
       channels.forEach((clients, channelName) => {
         if (clients.delete(ws)) {
           logger.debug(`Removed client ${clientId} from channel ${channelName} due to connection close`);
@@ -340,7 +314,6 @@ const server = Bun.serve({
 logger.info(`Claude to Figma WebSocket server running on port ${server.port}`);
 logger.info(`Status endpoint available at http://localhost:${server.port}/status`);
 
-// Print server stats every 5 minutes
 setInterval(() => {
   logger.info("Server stats:", {
     channels: channels.size,

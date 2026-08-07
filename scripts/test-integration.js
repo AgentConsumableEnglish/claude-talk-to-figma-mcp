@@ -7,12 +7,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import readline from 'readline';
 
-// Get current file directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname, '..');
 
-// Console colors
 const colors = {
   reset: '\x1b[0m',
   green: '\x1b[32m',
@@ -33,7 +31,6 @@ const log = {
   title: (msg) => console.log(`\n${colors.magenta}${colors.bold}== ${msg} ==${colors.reset}\n`)
 };
 
-// Function to create a readline interface for user input
 function createInterface() {
   return readline.createInterface({
     input: process.stdin,
@@ -41,7 +38,6 @@ function createInterface() {
   });
 }
 
-// Function to ask the user a question
 async function askQuestion(question) {
   const rl = createInterface();
   return new Promise(resolve => {
@@ -52,7 +48,6 @@ async function askQuestion(question) {
   });
 }
 
-// Check if port is in use
 function isPortInUse(port) {
   try {
     const server = createServer();
@@ -74,11 +69,10 @@ function isPortInUse(port) {
     });
   } catch (err) {
     log.error(`Error checking port ${port}: ${err.message}`);
-    return Promise.resolve(true); // Assume it's in use if there's an error
+    return Promise.resolve(true);
   }
 }
 
-// Verificar dependencias
 async function checkDependencies() {
   log.step('Verifying installed dependencies');
   
@@ -91,7 +85,6 @@ async function checkDependencies() {
     process.exit(1);
   }
 
-  // Verificar MCP SDK
   try {
     log.info('Verifying @modelcontextprotocol/sdk...');
     const packageJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
@@ -107,7 +100,6 @@ async function checkDependencies() {
   }
 }
 
-// Check Claude Desktop configuration
 async function checkClaudeConfig() {
   log.step('Verifying Claude Desktop configuration');
 
@@ -152,11 +144,9 @@ async function checkClaudeConfig() {
   }
 }
 
-// Start WebSocket server
 async function startWebSocketServer() {
   log.step('Starting WebSocket server');
   
-  // Check if port 3055 is in use
   const portInUse = await isPortInUse(3055);
   if (portInUse) {
     log.warning('Port 3055 is already in use. Possibly the WebSocket server is already running.');
@@ -188,20 +178,17 @@ async function startWebSocketServer() {
     console.error(`${colors.red}[WebSocket Error]${colors.reset} ${data.toString().trim()}`);
   });
   
-  // Wait for the server to start
   await new Promise(resolve => setTimeout(resolve, 1000));
   
   return wsServer;
 }
 
-// Check WebSocket server status
 async function checkWebSocketStatus() {
   log.step('Verifying WebSocket server status');
   
   try {
     log.info('Consulting status endpoint...');
     
-    // Perform HTTP request to status endpoint
     const fetchStatus = async () => {
       try {
         const response = await fetch('http://localhost:3055/status');
@@ -214,7 +201,6 @@ async function checkWebSocketStatus() {
       }
     };
     
-    // Try up to 3 times with 1 second wait between attempts
     let status = null;
     let tries = 0;
     while (tries < 3) {
@@ -243,7 +229,6 @@ async function checkWebSocketStatus() {
   }
 }
 
-// Check Figma plugin
 async function checkFigmaPlugin() {
   log.step('Verifying Figma plugin access');
   
@@ -251,7 +236,6 @@ async function checkFigmaPlugin() {
     log.info('This project uses a custom Claude MCP Plugin for Figma');
     log.info('The plugin code is located in the src/claude_mcp_plugin directory');
     
-    // Ask if the user has already installed the plugin
     const isPluginInstalled = await askQuestion('Have you installed the Claude MCP Plugin as a development plugin in Figma? (y/n)');
     if (isPluginInstalled.toLowerCase() !== 'y') {
       log.warning('Please install the plugin before continuing with tests');
@@ -276,17 +260,13 @@ async function checkFigmaPlugin() {
   }
 }
 
-// Run integration tests
 async function runIntegrationTests() {
   log.title('CLAUDE-FIGMA INTEGRATION TESTS');
   
-  // Check dependencies
   await checkDependencies();
   
-  // Check Claude configuration
   await checkClaudeConfig();
   
-  // Start and verify WebSocket server
   const wsServer = await startWebSocketServer();
   const serverStatus = await checkWebSocketStatus();
   
@@ -296,10 +276,8 @@ async function runIntegrationTests() {
     process.exit(1);
   }
   
-  // Check Figma plugin
   await checkFigmaPlugin();
   
-  // Instructions for manual tests
   log.step('Performing manual integration tests');
   
   log.info('\nTo complete integration tests, follow these steps:');
@@ -316,7 +294,6 @@ async function runIntegrationTests() {
   log.info('The test script has completed all automated checks.');
   log.info('Please continue manual tests according to the instructions above.');
   
-  // Ask if you want to keep the WebSocket server running
   if (wsServer) {
     const keepServerRunning = await askQuestion('Do you want to keep the WebSocket server running? (y/n)');
     if (keepServerRunning.toLowerCase() !== 'y') {
@@ -326,13 +303,11 @@ async function runIntegrationTests() {
     } else {
       log.info('WebSocket server will continue running in the background.');
       log.info('To stop it, press Ctrl+C in the terminal or use task manager.');
-      // Disconnect process from terminal so it continues running
       wsServer.unref();
     }
   }
 }
 
-// Run tests
 runIntegrationTests().catch(err => {
   log.error(`Error during tests: ${err.message}`);
   process.exit(1);

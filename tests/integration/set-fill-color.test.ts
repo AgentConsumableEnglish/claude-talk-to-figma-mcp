@@ -49,7 +49,6 @@ describe("set_fill_color tool integration", () => {
         r: 0.2,
         g: 0.4,
         b: 0.6,
-        // a is undefined
       });
 
       expect(mockSendCommand).toHaveBeenCalledTimes(1);
@@ -69,12 +68,12 @@ describe("set_fill_color tool integration", () => {
         r: 0.1,
         g: 0.3,
         b: 0.5,
-        a: 0, // This should be preserved as 0, not converted to 1
+        a: 0,
       });
 
       expect(mockSendCommand).toHaveBeenCalledTimes(1);
       const [command, payload] = mockSendCommand.mock.calls[0];
-      expect(payload.color.a).toBe(0); // Critical: should be 0, not 1
+      expect(payload.color.a).toBe(0);
 
       expect(response.content[0].text).toContain("RGBA(0.1, 0.3, 0.5, 0)");
     });
@@ -155,13 +154,11 @@ describe("set_fill_color tool integration", () => {
     it("rejects undefined r component", async () => {
       await expect(callToolWithValidation({
         nodeId: "nodeF1",
-        // r is missing
         g: 0.5,
         b: 0.8,
         a: 1,
       })).rejects.toThrow();
       
-      // WebSocket should not be called if validation fails
       expect(mockSendCommand).not.toHaveBeenCalled();
     });
 
@@ -169,7 +166,6 @@ describe("set_fill_color tool integration", () => {
       await expect(callToolWithValidation({
         nodeId: "nodeF2",
         r: 0.5,
-        // g is missing
         b: 0.8,
         a: 1,
       })).rejects.toThrow();
@@ -182,7 +178,6 @@ describe("set_fill_color tool integration", () => {
         nodeId: "nodeF3",
         r: 0.5,
         g: 0.8,
-        // b is missing
         a: 1,
       })).rejects.toThrow();
       
@@ -192,7 +187,7 @@ describe("set_fill_color tool integration", () => {
     it("rejects string r component", async () => {
       await expect(callToolWithValidation({
         nodeId: "nodeF4",
-        r: "red", // Invalid type
+        r: "red",
         g: 0.5,
         b: 0.8,
         a: 1,
@@ -205,7 +200,7 @@ describe("set_fill_color tool integration", () => {
       await expect(callToolWithValidation({
         nodeId: "nodeF5",
         r: 0.5,
-        g: null, // Invalid type
+        g: null,
         b: 0.8,
         a: 1,
       })).rejects.toThrow();
@@ -218,7 +213,7 @@ describe("set_fill_color tool integration", () => {
         nodeId: "nodeF6",
         r: 0.5,
         g: 0.8,
-        b: true, // Invalid type
+        b: true,
         a: 1,
       })).rejects.toThrow();
       
@@ -228,7 +223,7 @@ describe("set_fill_color tool integration", () => {
     it("rejects NaN values", async () => {
       await expect(callToolWithValidation({
         nodeId: "nodeF7",
-        r: NaN, // Invalid value
+        r: NaN,
         g: 0.5,
         b: 0.8,
         a: 1,
@@ -240,7 +235,7 @@ describe("set_fill_color tool integration", () => {
     it("rejects out-of-range values", async () => {
       await expect(callToolWithValidation({
         nodeId: "nodeF8",
-        r: 1.5, // Out of 0-1 range
+        r: 1.5,
         g: 0.5,
         b: 0.8,
         a: 1,
@@ -252,7 +247,7 @@ describe("set_fill_color tool integration", () => {
     it("rejects negative values", async () => {
       await expect(callToolWithValidation({
         nodeId: "nodeF9",
-        r: -0.1, // Negative value
+        r: -0.1,
         g: 0.5,
         b: 0.8,
         a: 1,
@@ -269,7 +264,7 @@ describe("set_fill_color tool integration", () => {
         r: 0,
         g: 0,
         b: 0,
-        a: 0, // Transparent black
+        a: 0,
       });
 
       const [command, payload] = mockSendCommand.mock.calls[0];

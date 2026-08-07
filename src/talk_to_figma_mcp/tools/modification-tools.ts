@@ -4,13 +4,7 @@ import { sendCommandToFigma } from "../utils/websocket";
 import { applyColorDefaults, applyDefault, FIGMA_DEFAULTS } from "../utils/defaults";
 import { Color } from "../types/color";
 
-/**
- * Register modification tools to the MCP server
- * This module contains tools for modifying existing elements in Figma
- * @param server - The MCP server instance
- */
 export function registerModificationTools(server: McpServer): void {
-  // Set Fill Color Tool
   server.tool(
     "set_fill_color",
     "Set the fill color of a node in Figma. Alpha component defaults to 1 (fully opaque) if not specified. Use alpha 0 for fully transparent.",
@@ -23,12 +17,10 @@ export function registerModificationTools(server: McpServer): void {
     },
     async ({ nodeId, r, g, b, a }) => {
       try {
-        // Additional validation: Ensure RGB values are provided (they should not be undefined)
         if (r === undefined || g === undefined || b === undefined) {
           throw new Error("RGB components (r, g, b) are required and cannot be undefined");
         }
         
-        // Apply default values safely - preserves opacity 0 for transparency
         const colorInput: Color = { r, g, b, a };
         const colorWithDefaults = applyColorDefaults(colorInput);
         
@@ -58,7 +50,6 @@ export function registerModificationTools(server: McpServer): void {
     }
   );
 
-  // Set Stroke Color Tool
   server.tool(
     "set_stroke_color",
     "Set the stroke color of a node in Figma (defaults: opacity 1, weight 1)",
@@ -109,7 +100,6 @@ export function registerModificationTools(server: McpServer): void {
     }
   );
 
-  // Move Node Tool
   server.tool(
     "move_node",
     "Move a node to a new position in Figma",
@@ -143,7 +133,6 @@ export function registerModificationTools(server: McpServer): void {
     }
   );
 
-  // Resize Node Tool
   server.tool(
     "resize_node",
     "Resize a node in Figma",
@@ -181,7 +170,6 @@ export function registerModificationTools(server: McpServer): void {
     }
   );
 
-  // Delete Node Tool
   server.tool(
     "delete_node",
     "Delete a node from Figma",
@@ -212,7 +200,6 @@ export function registerModificationTools(server: McpServer): void {
     }
   );
 
-  // Set Corner Radius Tool
   server.tool(
     "set_corner_radius",
     "Set the corner radius of a node in Figma",
@@ -256,7 +243,6 @@ export function registerModificationTools(server: McpServer): void {
     }
   );
 
-  // Auto Layout Tool
   server.tool(
     "set_auto_layout",
     "Configure auto layout properties for a node in Figma",
@@ -312,7 +298,6 @@ export function registerModificationTools(server: McpServer): void {
     }
   );
 
-  // Set Effects Tool
   server.tool(
     "set_effects",
     "Set the visual effects of a node in Figma",
@@ -368,7 +353,6 @@ export function registerModificationTools(server: McpServer): void {
     }
   );
 
-  // Set Effect Style ID Tool
   server.tool(
     "set_effect_style_id",
     "Apply an effect style to a node in Figma",
@@ -406,7 +390,6 @@ export function registerModificationTools(server: McpServer): void {
     }
   );
 
-  // Rename Node Tool
   server.tool(
     "rename_node",
     "Rename a node (frame, component, group, etc.) in Figma",

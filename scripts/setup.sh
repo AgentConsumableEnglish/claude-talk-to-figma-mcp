@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Detect package manager
 if command -v bun &> /dev/null; then
     PACKAGE_MANAGER="bun"
     echo "Bun detected, using it for setup..."
@@ -9,7 +8,6 @@ else
     echo "Bun not found, using npm instead..."
 fi
 
-# Install dependencies
 echo "Installing dependencies..."
 if [ "$PACKAGE_MANAGER" = "bun" ]; then
     bun install
@@ -17,7 +15,6 @@ else
     npm install
 fi
 
-# Configure for Claude Desktop
 echo "Configuring for Claude Desktop..."
 node scripts/configure-claude.js
 

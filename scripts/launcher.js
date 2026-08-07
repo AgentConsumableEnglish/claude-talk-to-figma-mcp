@@ -56,7 +56,6 @@ async function main() {
         if (answer.toLowerCase() === 'y') {
             const success = await installBun();
             if (success) {
-                // Try to find bun if it was just installed
                 const bunPath = path.join(os.homedir(), '.bun', 'bin', 'bun');
                 if (fs.existsSync(bunPath)) {
                     engine = bunPath;
@@ -71,7 +70,6 @@ async function main() {
         }
     }
 
-    // 1. Check for repository
     if (!fs.existsSync(FOLDER_NAME)) {
         console.log(`\n📥 Cloning repository from ${REPO_URL}...`);
         execSync(`git clone ${REPO_URL}`, { stdio: 'inherit' });
@@ -79,7 +77,6 @@ async function main() {
 
     process.chdir(FOLDER_NAME);
 
-    // 2. Install dependencies
     console.log(`\n📦 Installing dependencies using ${engine === 'npm' ? 'NPM' : 'Bun'}...`);
     if (engine === 'npm') {
         execSync('npm install', { stdio: 'inherit' });
@@ -93,11 +90,9 @@ async function main() {
         }
     }
 
-    // 3. Inform about Figma Plugin
     console.log('\n🔌 Reminder: Ensure the Figma plugin is installed!');
     console.log(`   Path to manifest: ${path.resolve('src/claude_mcp_plugin/manifest.json')}`);
 
-    // 4. Start Socket Server
     console.log('\n🚀 Starting Socket Server...');
     const startCmd = engine === 'npm' ? 'node' : engine;
     const startArgs = engine === 'npm' ? ['dist/socket.js'] : ['run', 'socket'];
