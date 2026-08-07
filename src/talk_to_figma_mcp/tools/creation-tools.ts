@@ -3,8 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { sendCommandToFigma } from "../utils/websocket";
 
 /**
- * Register creation tools to the MCP server
- * This module contains tools for creating various shapes and elements in Figma
+ * Register the creation tools — shapes and elements.
  * @param server - The MCP server instance
  */
 export function registerCreationTools(server: McpServer): void {

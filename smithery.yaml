@@ -3,10 +3,10 @@
 startCommand:
   type: stdio
   configSchema:
-    # JSON Schema defining the configuration options for the MCP.
+    # JSON Schema of the MCP config options.
     {}
   commandFunction:
-    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    # JS function that turns the config into the CLI command that starts the MCP on stdio.
     |-
     (config) => {
       // Try to detect if bun is available

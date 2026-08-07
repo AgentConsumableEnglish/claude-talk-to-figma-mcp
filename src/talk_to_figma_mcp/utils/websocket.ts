@@ -8,12 +8,12 @@ import { FigmaCommand, FigmaResponse, CommandProgressUpdate, PendingRequest, Pro
 let ws: WebSocket | null = null;
 let currentChannel: string | null = null;
 
-// Map of pending requests for promise tracking
+// Pending requests
 const pendingRequests = new Map<string, PendingRequest>();
 
 /**
- * Connects to the Figma server via WebSocket.
- * @param port - Optional port for the connection (defaults to defaultPort from config)
+ * Connect to the Figma server over WebSocket.
+ * @param port - Port to use (defaults to defaultPort)
  */
 export function connectToFigma(port: number = defaultPort) {
   // If already connected, do nothing
@@ -22,13 +22,13 @@ export function connectToFigma(port: number = defaultPort) {
     return;
   }
 
-  // If connection is in progress (CONNECTING state), wait
+  // Still CONNECTING: wait
   if (ws && ws.readyState === WebSocket.CONNECTING) {
     logger.info('Connection to Figma is already in progress');
     return;
   }
 
-  // If there's an existing socket in a closing state, clean it up
+  // Clean up a socket caught closing
   if (ws && (ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CLOSED)) {
     ws.removeAllListeners();
     ws = null;
@@ -70,10 +70,10 @@ export function connectToFigma(port: number = defaultPort) {
             // Update last activity timestamp
             request.lastActivity = Date.now();
 
-            // Reset the timeout to prevent timeouts during long-running operations
+            // Reset the timeout so long operations survive
             clearTimeout(request.timeout);
 
-            // Create a new timeout with extended time for long operations
+            // A longer timeout for long operations
             request.timeout = setTimeout(() => {
               if (pendingRequests.has(requestId)) {
                 logger.error(`Request ${requestId} timed out after extended period of inactivity`);
@@ -85,13 +85,13 @@ export function connectToFigma(port: number = defaultPort) {
             // Log progress
             logger.info(`Progress update for ${progressData.commandType}: ${progressData.progress}% - ${progressData.message}`);
 
-            // For completed updates, we could resolve the request early if desired
+            // A completed update could resolve the request early
             if (progressData.status === 'completed' && progressData.progress === 100) {
               // Optionally resolve early with partial data
               // request.resolve(progressData.payload);
               // pendingRequests.delete(requestId);
 
-              // Instead, just log the completion, wait for final result from Figma
+              // Log the completion; wait for Figma's final result
               logger.info(`Operation ${progressData.commandType} completed, waiting for final result`);
             }
           }
@@ -133,7 +133,7 @@ export function connectToFigma(port: number = defaultPort) {
 
     ws.on('error', (error) => {
       logger.error(`Socket error: ${error}`);
-      // Don't attempt to reconnect here, let the close handler do it
+      // The close handler reconnects, not this one
     });
 
     ws.on('close', (code, reason) => {
@@ -148,7 +148,7 @@ export function connectToFigma(port: number = defaultPort) {
         pendingRequests.delete(id);
       }
 
-      // Attempt to reconnect with exponential backoff
+      // Reconnect with exponential backoff
       const backoff = Math.min(30000, reconnectInterval * Math.pow(1.5, Math.floor(Math.random() * 5))); // Max 30s
       logger.info(`Attempting to reconnect in ${backoff/1000} seconds...`);
       setTimeout(() => connectToFigma(port), backoff);
@@ -156,15 +156,15 @@ export function connectToFigma(port: number = defaultPort) {
     
   } catch (error) {
     logger.error(`Failed to create WebSocket connection: ${error instanceof Error ? error.message : String(error)}`);
-    // Attempt to reconnect after a delay
+    // Reconnect after a delay
     setTimeout(() => connectToFigma(port), reconnectInterval);
   }
 }
 
 /**
- * Join a specific channel in Figma.
- * @param channelName - Name of the channel to join
- * @returns Promise that resolves when successfully joined the channel
+ * Join a channel in Figma.
+ * @param channelName - Channel to join
+ * @returns Resolves once joined
  */
 export async function joinChannel(channelName: string): Promise<void> {
   if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -182,19 +182,19 @@ export async function joinChannel(channelName: string): Promise<void> {
 }
 
 /**
- * Get the current channel the connection is joined to.
- * @returns The current channel name or null if not connected to any channel
+ * The channel this connection has joined.
+ * @returns The channel name, or null if none
  */
 export function getCurrentChannel(): string | null {
   return currentChannel;
 }
 
 /**
- * Send a command to Figma via WebSocket.
- * @param command - The command to send
- * @param params - Additional parameters for the command
- * @param timeoutMs - Timeout in milliseconds before failing
- * @returns A promise that resolves with the Figma response
+ * Send a command to Figma over WebSocket.
+ * @param command - The command
+ * @param params - Extra parameters
+ * @param timeoutMs - Milliseconds before failing
+ * @returns Resolves with Figma's response
  */
 export function sendCommandToFigma(
   command: FigmaCommand,
@@ -202,14 +202,14 @@ export function sendCommandToFigma(
   timeoutMs: number = 60000
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    // If not connected, try to connect first
+    // Not connected: connect first
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       connectToFigma();
       reject(new Error("Not connected to Figma. Attempting to connect..."));
       return;
     }
 
-    // Check if we need a channel for this command
+    // Does this command need a channel?
     const requiresChannel = command !== "join";
     if (requiresChannel && !currentChannel) {
       reject(new Error("Must join a channel before sending commands"));
@@ -242,7 +242,7 @@ export function sendCommandToFigma(
       }
     }, timeoutMs);
 
-    // Store the promise callbacks to resolve/reject later
+    // Keep the promise callbacks to settle later
     pendingRequests.set(id, {
       resolve,
       reject,

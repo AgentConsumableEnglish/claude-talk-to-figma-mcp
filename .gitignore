@@ -4,10 +4,10 @@ docs/
 coverage/
 .cursor/
 
-# NPM lock file (project uses Bun as primary package manager)
+# NPM lock file — Bun is the package manager
 package-lock.json
 
-# DXT packages (build artifacts - distribute via releases only)
+# DXT packages — build artifacts, shipped only in releases
 *.dxt
 
 # macOS system files

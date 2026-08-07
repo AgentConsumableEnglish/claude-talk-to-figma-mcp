@@ -1,11 +1,11 @@
-// Define TypeScript interfaces for Figma responses
+// Interfaces for Figma responses
 export interface FigmaResponse {
   id: string;
   result?: any;
   error?: string;
 }
 
-// Define interface for command progress updates
+// Command progress updates
 export interface CommandProgressUpdate {
   type: 'command_progress';
   commandId: string;
@@ -22,7 +22,7 @@ export interface CommandProgressUpdate {
   timestamp: number;
 }
 
-// Define TypeScript interfaces for tracking WebSocket requests
+// Tracking WebSocket requests
 export interface PendingRequest {
   resolve: (value: unknown) => void;
   reject: (reason: unknown) => void;
@@ -30,7 +30,7 @@ export interface PendingRequest {
   lastActivity: number;
 }
 
-// Define WebSocket message structures
+// WebSocket message structures
 export interface ProgressMessage {
   message: FigmaResponse | any;
   type?: string;
@@ -38,7 +38,7 @@ export interface ProgressMessage {
   [key: string]: any; // Allow any other properties
 }
 
-// Define possible command types for Figma
+// Command types for Figma
 export type FigmaCommand =
   | "get_document_info"
   | "get_selection"

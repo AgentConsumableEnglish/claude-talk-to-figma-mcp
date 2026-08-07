@@ -72,7 +72,7 @@ describe("set_stroke_color tool integration", () => {
         r: 0.1,
         g: 0.3,
         b: 0.5,
-        a: 0, // This should be preserved as 0, not converted to 1
+        a: 0, // Stays 0, never becomes 1
         strokeWeight: 1.5,
       });
 
@@ -410,7 +410,7 @@ describe("set_stroke_color tool integration", () => {
         r: 0.8,
         g: 0.2,
         b: 0.4,
-        // Both a and strokeWeight are undefined, should get defaults
+        // a and strokeWeight undefined: defaults apply
       });
 
       const [command, payload] = mockSendCommand.mock.calls[0];

@@ -1,4 +1,4 @@
-// Custom logging functions that write to stderr instead of stdout to avoid being captured
+// Log to stderr, not stdout, so output is not captured
 export const logger = {
   info: (message: string) => process.stderr.write(`[INFO] ${message}\n`),
   debug: (message: string) => process.stderr.write(`[DEBUG] ${message}\n`),

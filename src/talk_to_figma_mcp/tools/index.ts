@@ -18,7 +18,7 @@ export function registerTools(server: McpServer): void {
   registerComponentTools(server);
 }
 
-// Export all tool registration functions for individual usage if needed
+// Export each registration for use on its own
 export {
   registerDocumentTools,
   registerCreationTools,

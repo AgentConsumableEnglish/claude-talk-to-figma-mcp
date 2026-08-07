@@ -1,11 +1,11 @@
 /**
- * Utilidades para el procesamiento de nodos y respuestas de Figma
+ * Utilidades para nodos y respuestas de Figma
  */
 
 /**
- * Convierte un color RGBA a formato hexadecimal.
- * @param color - El color en formato RGBA con valores entre 0 y 1
- * @returns El color en formato hexadecimal (#RRGGBBAA)
+ * Convierte un color RGBA a hexadecimal.
+ * @param color - RGBA con valores entre 0 y 1
+ * @returns Hexadecimal (#RRGGBBAA)
  */
 export function rgbaToHex(color: any): string {
   const r = Math.round(color.r * 255);
@@ -17,13 +17,13 @@ export function rgbaToHex(color: any): string {
 }
 
 /**
- * Filtra un nodo de Figma para reducir su complejidad y tamaño.
- * Convierte colores a formato hexadecimal y elimina datos innecesarios.
- * @param node - El nodo de Figma a filtrar
- * @returns El nodo filtrado o null si debe ser ignorado
+ * Filtra un nodo de Figma para reducir su tamaño.
+ * Convierte colores a hexadecimal y quita datos que sobran.
+ * @param node - El nodo a filtrar
+ * @returns El nodo filtrado, o null si se ignora
  */
 export function filterFigmaNode(node: any) {
-  // Skip VECTOR type nodes
+  // Skip VECTOR nodes
   if (node.type === "VECTOR") {
     return null;
   }
@@ -112,19 +112,19 @@ export function filterFigmaNode(node: any) {
 }
 
 /**
- * Procesa un nodo de respuesta de Figma para propósitos de logging.
+ * Procesa un nodo de respuesta de Figma para logging.
  * @param result - El resultado a procesar
- * @returns El resultado original sin modificaciones
+ * @returns El resultado original sin cambios
  */
 export function processFigmaNodeResponse(result: unknown): any {
   if (!result || typeof result !== "object") {
     return result;
   }
 
-  // Check if this looks like a node response
+  // Does this look like a node response?
   const resultObj = result as Record<string, unknown>;
   if ("id" in resultObj && typeof resultObj.id === "string") {
-    // It appears to be a node response, log the details
+    // A node response: log the details
     console.info(
       `Processed Figma node: ${resultObj.name || "Unknown"} (ID: ${resultObj.id})`
     );

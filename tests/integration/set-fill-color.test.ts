@@ -69,12 +69,12 @@ describe("set_fill_color tool integration", () => {
         r: 0.1,
         g: 0.3,
         b: 0.5,
-        a: 0, // This should be preserved as 0, not converted to 1
+        a: 0, // Stays 0, never becomes 1
       });
 
       expect(mockSendCommand).toHaveBeenCalledTimes(1);
       const [command, payload] = mockSendCommand.mock.calls[0];
-      expect(payload.color.a).toBe(0); // Critical: should be 0, not 1
+      expect(payload.color.a).toBe(0); // Must stay 0, not 1
 
       expect(response.content[0].text).toContain("RGBA(0.1, 0.3, 0.5, 0)");
     });
@@ -161,7 +161,7 @@ describe("set_fill_color tool integration", () => {
         a: 1,
       })).rejects.toThrow();
       
-      // WebSocket should not be called if validation fails
+      // Validation failure must not reach the WebSocket
       expect(mockSendCommand).not.toHaveBeenCalled();
     });
 

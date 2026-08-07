@@ -3,8 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { sendCommandToFigma } from "../utils/websocket";
 
 /**
- * Register text-related tools to the MCP server
- * This module contains tools for working with text elements in Figma
+ * Register the text tools.
  * @param server - The MCP server instance
  */
 export function registerTextTools(server: McpServer): void {
@@ -74,7 +73,7 @@ export function registerTextTools(server: McpServer): void {
           };
         }
 
-        // Initial response to indicate we're starting the process
+        // First response: the process has started
         const initialStatus = {
           type: "text" as const,
           text: `Starting text replacement for ${text.length} nodes. This will be processed in batches of 5...`,
@@ -84,13 +83,13 @@ export function registerTextTools(server: McpServer): void {
         let totalProcessed = 0;
         const totalToProcess = text.length;
 
-        // Use the plugin's set_multiple_text_contents function with chunking
+        // The plugin's set_multiple_text_contents, chunked
         const result = await sendCommandToFigma("set_multiple_text_contents", {
           nodeId,
           text,
         });
 
-        // Cast the result to a specific type to work with it safely
+        // Cast the result to a known type
         interface TextReplaceResult {
           success: boolean;
           nodeId: string;
@@ -122,7 +121,7 @@ export function registerTextTools(server: McpServer): void {
         const detailedResults = typedResult.results || [];
         const failedResults = detailedResults.filter(item => !item.success);
 
-        // Create the detailed part of the response
+        // The detailed part of the response
         let detailedResponse = "";
         if (failedResults.length > 0) {
           detailedResponse = `\n\nNodes that failed:\n${failedResults.map(item =>

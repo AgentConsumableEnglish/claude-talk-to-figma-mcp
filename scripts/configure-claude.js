@@ -6,16 +6,16 @@ import os from 'os';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
-// Get current file directory (ES modules don't have __dirname)
+// ES modules have no __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Determine the location of Claude Desktop configuration file
+// Find the Claude Desktop config file
 const configPath = os.platform() === 'darwin' 
   ? path.join(os.homedir(), 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json')
   : path.join(os.homedir(), 'AppData', 'Roaming', 'Claude', 'claude_desktop_config.json');
 
-// Get the absolute path of package.json
+// Absolute path of package.json
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const packageName = packageJson.name;
@@ -32,7 +32,7 @@ function backupFile(filePath) {
   }
 }
 
-// Read existing configuration or create new one
+// Read the config or create one
 let config = {};
 try {
   if (fs.existsSync(configPath)) {
@@ -42,7 +42,7 @@ try {
   } else {
     console.log('No existing configuration found. Creating new one.');
     
-    // Create required directories if they don't exist
+    // Create missing directories
     const configDir = path.dirname(configPath);
     if (!fs.existsSync(configDir)) {
       fs.mkdirSync(configDir, { recursive: true });
@@ -54,7 +54,7 @@ try {
   console.error('Creating new configuration.');
 }
 
-// Check if bun is installed
+// Check bun is installed
 let useBun = false;
 try {
   execSync('bun --version', { stdio: 'ignore' });

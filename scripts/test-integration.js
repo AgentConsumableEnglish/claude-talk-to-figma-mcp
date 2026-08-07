@@ -7,7 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import readline from 'readline';
 
-// Get current file directory
+// Current file directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname, '..');
@@ -33,7 +33,7 @@ const log = {
   title: (msg) => console.log(`\n${colors.magenta}${colors.bold}== ${msg} ==${colors.reset}\n`)
 };
 
-// Function to create a readline interface for user input
+// Readline interface for user input
 function createInterface() {
   return readline.createInterface({
     input: process.stdin,
@@ -41,7 +41,7 @@ function createInterface() {
   });
 }
 
-// Function to ask the user a question
+// Ask the user a question
 async function askQuestion(question) {
   const rl = createInterface();
   return new Promise(resolve => {
@@ -52,7 +52,7 @@ async function askQuestion(question) {
   });
 }
 
-// Check if port is in use
+// Is the port in use?
 function isPortInUse(port) {
   try {
     const server = createServer();
@@ -74,7 +74,7 @@ function isPortInUse(port) {
     });
   } catch (err) {
     log.error(`Error checking port ${port}: ${err.message}`);
-    return Promise.resolve(true); // Assume it's in use if there's an error
+    return Promise.resolve(true); // On error, assume in use
   }
 }
 
@@ -156,7 +156,7 @@ async function checkClaudeConfig() {
 async function startWebSocketServer() {
   log.step('Starting WebSocket server');
   
-  // Check if port 3055 is in use
+  // Is port 3055 in use?
   const portInUse = await isPortInUse(3055);
   if (portInUse) {
     log.warning('Port 3055 is already in use. Possibly the WebSocket server is already running.');
@@ -201,7 +201,7 @@ async function checkWebSocketStatus() {
   try {
     log.info('Consulting status endpoint...');
     
-    // Perform HTTP request to status endpoint
+    // Request the status endpoint
     const fetchStatus = async () => {
       try {
         const response = await fetch('http://localhost:3055/status');
@@ -214,7 +214,7 @@ async function checkWebSocketStatus() {
       }
     };
     
-    // Try up to 3 times with 1 second wait between attempts
+    // Try 3 times, a second apart
     let status = null;
     let tries = 0;
     while (tries < 3) {
@@ -251,7 +251,7 @@ async function checkFigmaPlugin() {
     log.info('This project uses a custom Claude MCP Plugin for Figma');
     log.info('The plugin code is located in the src/claude_mcp_plugin directory');
     
-    // Ask if the user has already installed the plugin
+    // Ask whether the user installed the plugin
     const isPluginInstalled = await askQuestion('Have you installed the Claude MCP Plugin as a development plugin in Figma? (y/n)');
     if (isPluginInstalled.toLowerCase() !== 'y') {
       log.warning('Please install the plugin before continuing with tests');
@@ -316,7 +316,7 @@ async function runIntegrationTests() {
   log.info('The test script has completed all automated checks.');
   log.info('Please continue manual tests according to the instructions above.');
   
-  // Ask if you want to keep the WebSocket server running
+  // Ask whether to keep the server running
   if (wsServer) {
     const keepServerRunning = await askQuestion('Do you want to keep the WebSocket server running? (y/n)');
     if (keepServerRunning.toLowerCase() !== 'y') {
@@ -326,7 +326,7 @@ async function runIntegrationTests() {
     } else {
       log.info('WebSocket server will continue running in the background.');
       log.info('To stop it, press Ctrl+C in the terminal or use task manager.');
-      // Disconnect process from terminal so it continues running
+      // Detach the process so it keeps running
       wsServer.unref();
     }
   }

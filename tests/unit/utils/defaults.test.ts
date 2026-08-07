@@ -33,7 +33,7 @@ describe('defaults utilities', () => {
     it('should preserve opacity 0 (transparency)', () => {
       const result = applyColorDefaults(testColors.fullyTransparent);
       expect(result).toEqual(expectedColorWithDefaults.fullyTransparent);
-      expect(result.a).toBe(0); // Critical: should be 0, not 1
+      expect(result.a).toBe(0); // Must stay 0, not 1
     });
 
     it('should preserve opacity 1 (opaque)', () => {
@@ -73,7 +73,7 @@ describe('defaults utilities', () => {
         expect(result.g).toBe(input.g);
         expect(result.b).toBe(input.b);
         
-        // Ensure alpha is either preserved or defaulted correctly
+        // Alpha is kept or defaulted
         if (input.a !== undefined) {
           expect(result.a).toBe(input.a);
         } else {

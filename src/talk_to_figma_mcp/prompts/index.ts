@@ -1,6 +1,6 @@
 /**
- * This module contains all the prompts used by the Figma MCP server.
- * Prompts provide guidance to Claude on how to work with Figma designs effectively.
+ * All prompts the Figma MCP server uses.
+ * Prompts guide Claude in working with Figma designs.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -268,8 +268,8 @@ export function registerDesignStrategyPrompt(server: McpServer): void {
     "design_strategy",
     "Best practices for working with Figma designs",
     (extra) => {
-      // Implementation is the same as above
-      // This function is exported for individual usage if needed
+      // Same implementation as above
+      // Exported for use on its own
     }
   );
 }
@@ -279,8 +279,8 @@ export function registerReadDesignStrategyPrompt(server: McpServer): void {
     "read_design_strategy",
     "Best practices for reading Figma designs",
     (extra) => {
-      // Implementation is the same as above
-      // This function is exported for individual usage if needed
+      // Same implementation as above
+      // Exported for use on its own
     }
   );
 }
@@ -290,8 +290,8 @@ export function registerTextReplacementStrategyPrompt(server: McpServer): void {
     "text_replacement_strategy",
     "Systematic approach for replacing text in Figma designs",
     (extra) => {
-      // Implementation is the same as above
-      // This function is exported for individual usage if needed
+      // Same implementation as above
+      // Exported for use on its own
     }
   );
 }

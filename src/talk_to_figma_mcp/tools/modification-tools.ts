@@ -5,8 +5,7 @@ import { applyColorDefaults, applyDefault, FIGMA_DEFAULTS } from "../utils/defau
 import { Color } from "../types/color";
 
 /**
- * Register modification tools to the MCP server
- * This module contains tools for modifying existing elements in Figma
+ * Register the modification tools.
  * @param server - The MCP server instance
  */
 export function registerModificationTools(server: McpServer): void {
@@ -23,12 +22,12 @@ export function registerModificationTools(server: McpServer): void {
     },
     async ({ nodeId, r, g, b, a }) => {
       try {
-        // Additional validation: Ensure RGB values are provided (they should not be undefined)
+        // Check the RGB values are present, not undefined
         if (r === undefined || g === undefined || b === undefined) {
           throw new Error("RGB components (r, g, b) are required and cannot be undefined");
         }
         
-        // Apply default values safely - preserves opacity 0 for transparency
+        // Apply defaults without losing opacity 0
         const colorInput: Color = { r, g, b, a };
         const colorWithDefaults = applyColorDefaults(colorInput);
         

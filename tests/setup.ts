@@ -1,7 +1,6 @@
 /**
- * Test setup file for Jest
- * This file runs before all tests
+ * Jest setup — runs before all tests.
  */
 
-// Add custom matchers or global test utilities here if needed
+// Add matchers or global test utilities here
 export {};

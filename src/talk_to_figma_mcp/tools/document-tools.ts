@@ -4,7 +4,7 @@ import { sendCommandToFigma, joinChannel } from "../utils/websocket.js";
 import { filterFigmaNode } from "../utils/figma-helpers.js";
 
 /**
- * Register document-related tools to the MCP server
+ * Register the document tools.
  * @param server - The MCP server instance
  */
 export function registerDocumentTools(server: McpServer): void {
@@ -229,20 +229,20 @@ export function registerDocumentTools(server: McpServer): void {
     },
     async ({ nodeId }) => {
       try {
-        // Initial response to indicate we're starting the process
+        // First response: the process has started
         const initialStatus = {
           type: "text" as const,
           text: "Starting text node scanning. This may take a moment for large designs...",
         };
 
-        // Use the plugin's scan_text_nodes function with chunking flag
+        // The plugin's scan_text_nodes, with chunking on
         const result = await sendCommandToFigma("scan_text_nodes", {
           nodeId,
           useChunking: true,  // Enable chunking on the plugin side
           chunkSize: 10       // Process 10 nodes at a time
         });
 
-        // If the result indicates chunking was used, format the response accordingly
+        // If chunking ran, say so in the response
         if (result && typeof result === 'object' && 'chunks' in result) {
           const typedResult = result as {
             success: boolean,
@@ -273,7 +273,7 @@ export function registerDocumentTools(server: McpServer): void {
           };
         }
 
-        // If chunking wasn't used or wasn't reported in the result format, return the result as is
+        // No chunking reported: return the result as is
         return {
           content: [
             initialStatus,
@@ -306,7 +306,7 @@ export function registerDocumentTools(server: McpServer): void {
     async ({ channel }) => {
       try {
         if (!channel) {
-          // If no channel provided, ask the user for input
+          // No channel given: ask the user
           return {
             content: [
               {
@@ -321,7 +321,7 @@ export function registerDocumentTools(server: McpServer): void {
           };
         }
 
-        // Use joinChannel instead of sendCommandToFigma to ensure currentChannel is updated
+        // joinChannel, not sendCommandToFigma, so currentChannel updates
         await joinChannel(channel);
 
         return {

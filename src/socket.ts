@@ -1,6 +1,6 @@
 import { Server, ServerWebSocket } from "bun";
 
-// Enhanced logging system
+// Logging
 const logger = {
   info: (message: string, ...args: any[]) => {
     console.log(`[INFO] ${message}`, ...args);
@@ -16,10 +16,10 @@ const logger = {
   }
 };
 
-// Store clients by channel
+// Clients by channel
 const channels = new Map<string, Set<ServerWebSocket<any>>>();
 
-// Keep track of channel statistics
+// Channel statistics
 const stats = {
   totalConnections: 0,
   activeConnections: 0,
@@ -29,18 +29,18 @@ const stats = {
 };
 
 function handleConnection(ws: ServerWebSocket<any>) {
-  // Track connection statistics
+  // Connection statistics
   stats.totalConnections++;
   stats.activeConnections++;
   
-  // Assign a unique client ID for better tracking
+  // Give each client a unique ID for tracking
   const clientId = `client_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   ws.data = { clientId };
   
   // Don't add to clients immediately - wait for channel join
   logger.info(`New client connected: ${clientId}`);
 
-  // Send welcome message to the new client
+  // Welcome the new client
   try {
     ws.send(JSON.stringify({
       type: "system",
@@ -84,7 +84,7 @@ function handleConnection(ws: ServerWebSocket<any>) {
 
 const server = Bun.serve({
   port: 3055,
-  // uncomment this to allow connections in windows wsl
+  // Uncomment to allow connections in Windows WSL
   // hostname: "0.0.0.0",
   fetch(req: Request, server: Server) {
     const url = new URL(req.url);
@@ -134,7 +134,7 @@ const server = Bun.serve({
       return new Response("Failed to upgrade to WebSocket", { status: 500 });
     }
 
-    // Return response for non-WebSocket requests
+    // Answer non-WebSocket requests
     return new Response("Claude to Figma WebSocket server running. Try connecting with a WebSocket client.", {
       headers: {
         "Content-Type": "text/plain",
@@ -164,7 +164,7 @@ const server = Bun.serve({
             return;
           }
 
-          // Create channel if it doesn't exist
+          // Create the channel if missing
           if (!channels.has(channelName)) {
             logger.info(`Creating new channel: ${channelName}`);
             channels.set(channelName, new Set());
@@ -175,7 +175,7 @@ const server = Bun.serve({
           channelClients.add(ws);
           logger.info(`Client ${clientId} joined channel: ${channelName}`);
 
-          // Notify client they joined successfully
+          // Tell the client they joined
           try {
             ws.send(JSON.stringify({
               type: "system",
@@ -249,7 +249,7 @@ const server = Bun.serve({
             return;
           }
 
-          // Broadcast to all clients in the channel
+          // Broadcast to the channel
           try {
             let broadcastCount = 0;
             channelClients.forEach((client) => {
@@ -288,7 +288,7 @@ const server = Bun.serve({
 
           logger.debug(`Progress update for command ${data.id} in channel ${channelName}: ${data.message?.data?.status || 'unknown'} - ${data.message?.data?.progress || 0}%`);
           
-          // Broadcast progress update to all clients in the channel
+          // Broadcast the progress update to the channel
           try {
             channelClients.forEach((client) => {
               if (client.readyState === WebSocket.OPEN) {

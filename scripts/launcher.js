@@ -56,7 +56,7 @@ async function main() {
         if (answer.toLowerCase() === 'y') {
             const success = await installBun();
             if (success) {
-                // Try to find bun if it was just installed
+                // Find bun if just installed
                 const bunPath = path.join(os.homedir(), '.bun', 'bin', 'bun');
                 if (fs.existsSync(bunPath)) {
                     engine = bunPath;

@@ -216,7 +216,7 @@
           </button>
         </div>
         
-        <!-- Add Progress Bar Section -->
+        <!-- Progress bar -->
         <div id="progress-container" class="section hidden">
           <h2>Operation Progress</h2>
           <div id="progress-message">No operation in progress</div>
@@ -274,7 +274,7 @@
       const tabs = document.querySelectorAll(".tab");
       const tabContents = document.querySelectorAll(".tab-content");
 
-      // Add UI elements for progress tracking
+      // UI elements for progress tracking
       const progressContainer = document.getElementById("progress-container");
       const progressBar = document.getElementById("progress-bar");
       const progressMessage = document.getElementById("progress-message");
@@ -315,7 +315,7 @@
             console.log("Joining channel:", channelName);
             state.channel = channelName;
 
-            // Join the channel using the same format as App.tsx
+            // Join the channel, same format as App.tsx
             state.socket.send(
               JSON.stringify({
                 type: "join",
@@ -330,7 +330,7 @@
               console.log("Received message:", data);
 
               if (data.type === "system") {
-                // Successfully joined channel
+                // Joined the channel
                 if (data.message && data.message.result) {
                   state.connected = true;
                   const channelName = data.channel;
@@ -398,7 +398,7 @@
         const data = payload.message;
         console.log("handleSocketMessage", data);
 
-        // If it's a response to a previous request
+        // A response to an earlier request
         if (data.id && state.pendingRequests.has(data.id)) {
           const { resolve, reject } = state.pendingRequests.get(data.id);
           state.pendingRequests.delete(data.id);
@@ -411,7 +411,7 @@
           return;
         }
 
-        // If it's a new command
+        // A new command
         if (data.command) {
           try {
             // Send the command to the plugin code
@@ -460,7 +460,7 @@
             })
           );
 
-          // Set timeout to reject the promise after 90 seconds
+          // Reject the promise after 90 seconds
           setTimeout(() => {
             if (state.pendingRequests.has(id)) {
               state.pendingRequests.delete(id);
@@ -505,14 +505,14 @@
         );
       }
 
-      // Helper to generate unique IDs
+      // Generate unique IDs
       function generateId() {
         return (
           Date.now().toString(36) + Math.random().toString(36).substr(2, 5)
         );
       }
 
-      // Add this function after the generateId() function
+      // Keep after generateId()
       function generateChannelName() {
         const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
         let result = "";
@@ -551,7 +551,7 @@
         disconnectFromServer();
       });
 
-      // Function to update progress UI
+      // Update the progress UI
       function updateProgressUI(progressData) {
         // Show progress container if hidden
         progressContainer.classList.remove("hidden");
@@ -564,7 +564,7 @@
         // Update message
         progressMessage.textContent = progressData.message || "Operation in progress";
         
-        // Update status text based on operation state
+        // Status text follows operation state
         if (progressData.status === 'started') {
           progressStatus.textContent = "Started";
           progressStatus.className = "";
@@ -585,7 +585,7 @@
         }
       }
 
-      // Send operation progress update to server
+      // Send the progress update to the server
       function sendProgressUpdateToServer(progressData) {
         if (!state.connected || !state.socket) {
           console.error("Cannot send progress update: socket not connected");
@@ -636,15 +636,15 @@
             disconnectButton.click();
             break;
           case "command-result":
-            // Forward the result from plugin code back to WebSocket
+            // Forward the plugin's result to the WebSocket
             sendSuccessResponse(message.id, message.result);
             break;
           case "command-error":
-            // Forward the error from plugin code back to WebSocket
+            // Forward the plugin's error to the WebSocket
             sendErrorResponse(message.id, message.error);
             break;
           case "command_progress":
-            // Update UI with progress information
+            // Update the UI with progress
             updateProgressUI(message);
             // Forward progress update to server
             sendProgressUpdateToServer(message);
