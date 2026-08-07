@@ -1,6 +1,6 @@
 # Backlog del Proceso de Refactorización
 
-Este documento registra el progreso y las decisiones tomadas durante la refactorización del archivo `server.ts` en módulos más pequeños y mantenibles.
+Progreso y decisiones de la refactorización de `server.ts` en módulos pequeños.
 
 ## Paso 2: Extracción de Tipos y Configuración ✅
 
@@ -14,36 +14,36 @@ Este documento registra el progreso y las decisiones tomadas durante la refactor
 
 #### 1. Creación del archivo `types/index.ts`:
 - Extraídas todas las interfaces y tipos del archivo original, incluyendo:
-  - `FigmaResponse`: Interfaz para las respuestas de Figma
-  - `CommandProgressUpdate`: Interfaz para las actualizaciones de progreso de comandos
-  - `PendingRequest`: Interfaz para seguimiento de peticiones WebSocket
-  - `ProgressMessage`: Interfaz para mensajes de progreso
-  - `FigmaCommand`: Tipo que enumera todos los comandos de Figma soportados
-- Se han mantenido los nombres originales para facilitar la refactorización posterior
+  - `FigmaResponse`: Respuestas de Figma
+  - `CommandProgressUpdate`: Progreso de comandos
+  - `PendingRequest`: Seguimiento de peticiones WebSocket
+  - `ProgressMessage`: Mensajes de progreso
+  - `FigmaCommand`: Enumera los comandos de Figma soportados
+- Los nombres originales se quedan, para facilitar el resto de la refactorización
 
 #### 2. Creación del archivo `config/config.ts`:
-- Extraída toda la lógica de configuración del servidor:
+- Extraída la configuración del servidor:
   - Procesamiento de argumentos de línea de comandos (`--server`, `--port`, `--reconnect-interval`)
   - Valores de configuración como `serverUrl`, `defaultPort`, y `reconnectInterval`
   - URL de WebSocket (`WS_URL`) basada en el entorno
   - Configuración del servidor MCP (nombre, descripción, versión)
-- Se ha añadido una constante `SERVER_CONFIG` que agrupa la configuración del servidor MCP
+- Una constante `SERVER_CONFIG` agrupa la configuración del servidor MCP
 
 ### Decisiones de diseño:
-- **Tipos**: Se han extraído todos los tipos en un solo archivo `index.ts` para facilitar su importación desde otros módulos
-- **Configuración**: Se ha elegido un enfoque centralizado para los parámetros de configuración, siguiendo el principio de tener un único lugar para todas las constantes y configuraciones
-- **Nombres de exportación**: Se han mantenido los mismos nombres de variables y constantes para minimizar los cambios necesarios en el resto del código
-- **Importaciones**: Se ha conservado la dependencia de `zod` en el archivo de configuración para mantener la coherencia con el código original
+- **Tipos**: Todos en un solo `index.ts`, fáciles de importar
+- **Configuración**: Un único lugar para todas las constantes
+- **Nombres de exportación**: Sin cambios, para tocar menos código
+- **Importaciones**: `zod` se queda en la configuración, como en el original
 
 ### Próximos pasos:
 - Extraer las utilidades (logger, figma-helpers, websocket)
-- Modificar las herramientas para que utilicen los tipos y configuraciones extraídos
+- Pasar las herramientas a los tipos y configuración extraídos
 - Actualizar el archivo principal `server.ts` para importar los nuevos módulos
 
 ### Impacto en el código existente:
-- Esta fase no modifica la funcionalidad del código
-- Los próximos pasos deberán actualizar las importaciones para usar los nuevos módulos
-- Al mantener los mismos nombres de tipos y variables, se minimiza el impacto de los cambios
+- Esta fase no cambia lo que hace el código
+- Los próximos pasos actualizarán las importaciones
+- Con los mismos nombres, el cambio pega menos
 
 ## Paso 3: Extracción de Utilidades ✅
 
@@ -57,56 +57,56 @@ Este documento registra el progreso y las decisiones tomadas durante la refactor
 ### Cambios realizados:
 
 #### 1. Creación del archivo `utils/logger.ts`:
-- Extraídas las funciones de logging que escriben en stderr:
-  - Se ha creado un objeto `logger` con métodos para distintos niveles: `info`, `debug`, `warn`, `error` y `log`
-  - Todos los métodos escriben en `stderr` en lugar de `stdout` para evitar interferir con la comunicación MCP
+- Extraído el logging a stderr:
+  - Un objeto `logger` con niveles `info`, `debug`, `warn`, `error` y `log`
+  - Todo va a `stderr`, no a `stdout`, para no pisar la comunicación MCP
 
 #### 2. Creación del archivo `utils/figma-helpers.ts`:
-- Extraídas las funciones auxiliares para procesar datos de Figma:
-  - `rgbaToHex`: Para convertir colores RGBA a formato hexadecimal
-  - `filterFigmaNode`: Para filtrar y simplificar los nodos de Figma, reduciendo su complejidad
-  - `processFigmaNodeResponse`: Para procesar respuestas de nodos de Figma con fines de logging
-- Se ha añadido documentación JSDoc a todas las funciones para mejorar la comprensión
+- Extraídos los auxiliares para datos de Figma:
+  - `rgbaToHex`: RGBA a hexadecimal
+  - `filterFigmaNode`: Filtra y simplifica los nodos de Figma
+  - `processFigmaNodeResponse`: Procesa respuestas de nodos para el logging
+- JSDoc en todas las funciones
 
 #### 3. Creación del archivo `utils/websocket.ts`:
-- Extraída toda la lógica de WebSocket:
+- Extraído el WebSocket:
   - Variables de estado (`ws`, `currentChannel`, `pendingRequests`)
-  - `connectToFigma`: Para establecer la conexión con el servidor de Figma
-  - `joinChannel`: Para unirse a un canal específico
-  - `sendCommandToFigma`: Para enviar comandos a Figma y manejar las respuestas
-  - Se ha añadido un nuevo método `getCurrentChannel` para obtener el canal actual
-- Se han organizado los manejadores de eventos WebSocket:
+  - `connectToFigma`: Conecta con el servidor de Figma
+  - `joinChannel`: Se une a un canal
+  - `sendCommandToFigma`: Envía comandos a Figma y maneja las respuestas
+  - Nuevo método `getCurrentChannel` para el canal actual
+- Manejadores de eventos WebSocket:
   - Eventos `open`, `message`, `error` y `close`
-  - Lógica para los timeouts de conexión y reconexión automática
+  - Timeouts de conexión y reconexión automática
 
 ### Decisiones de diseño:
-- **Modularidad**: Cada archivo tiene una responsabilidad clara y específica
-- **Encapsulamiento**: Las variables de estado como `ws` y `currentChannel` están encapsuladas en el módulo websocket
-- **Documentación**: Se ha añadido documentación JSDoc a las funciones principales para mejorar la comprensión
-- **Tipado**: Se han utilizado los tipos definidos en el paso anterior para asegurar la consistencia
-- **Gestión de errores**: Se ha mejorado la gestión de errores con mensajes más descriptivos
+- **Modularidad**: Cada archivo con su trabajo
+- **Encapsulamiento**: El estado (`ws`, `currentChannel`) queda dentro del módulo websocket
+- **Documentación**: JSDoc en las funciones principales
+- **Tipado**: Usa los tipos del paso anterior
+- **Errores**: Mensajes más claros
 
 ### Mejoras realizadas:
-- Se ha añadido un método `getCurrentChannel()` que no existía en el código original
-- Se ha mejorado la documentación de las funciones con JSDoc
-- Se han organizado las importaciones de forma más clara y específica
-- Se han tipado correctamente los parámetros y retornos de las funciones
+- Nuevo `getCurrentChannel()`, que el original no tenía
+- JSDoc en las funciones
+- Importaciones más claras
+- Parámetros y retornos tipados
 
 ### Próximos pasos:
-- Organizar las herramientas por categorías (document-tools, creation-tools, etc.)
+- Organizar las herramientas por categorías
 - Organizar los prompts en un módulo separado
-- Refactorizar el archivo principal `server.ts` para utilizar los nuevos módulos
+- Refactorizar `server.ts` para usar los nuevos módulos
 
 ### Impacto en el código existente:
-- Las utilidades extraídas pueden ser importadas y utilizadas por las herramientas
-- La separación del WebSocket facilita las pruebas unitarias al poder mock-ear la conexión
-- La separación del logger permite cambiar la implementación del logging en el futuro sin afectar al resto del código
+- Las herramientas pueden importar las utilidades extraídas
+- Con el WebSocket aparte, la conexión se puede mockear en los tests
+- Con el logger aparte, se puede cambiar el logging sin tocar el resto
 
 ## Punto 4: Organizar Herramientas por Categorías ✅ (04-05-2025)
 
-Se ha completado la organización de las herramientas en archivos separados según su categoría. Se han creado los siguientes archivos:
+Las herramientas quedan en archivos separados por categoría:
 
-- **document-tools.ts**: Contiene herramientas relacionadas con información del documento, selección, y exportación de imágenes
+- **document-tools.ts**: Documento, selección y exportación de imágenes
   - `get_document_info`: Obtener información del documento
   - `get_selection`: Obtener selección actual
   - `get_node_info`: Obtener información de un nodo específico
@@ -118,7 +118,7 @@ Se ha completado la organización de las herramientas en archivos separados seg�
   - `join_channel`: Unirse a un canal
   - `export_node_as_image`: Exportar nodo como imagen
 
-- **creation-tools.ts**: Contiene herramientas para crear elementos en Figma
+- **creation-tools.ts**: Crear elementos en Figma
   - `create_rectangle`: Crear rectángulo
   - `create_frame`: Crear frame
   - `create_text`: Crear texto
@@ -131,7 +131,7 @@ Se ha completado la organización de las herramientas en archivos separados seg�
   - `insert_child`: Insertar nodo hijo
   - `flatten_node`: Aplanar nodo
 
-- **modification-tools.ts**: Contiene herramientas para modificar elementos existentes
+- **modification-tools.ts**: Modificar elementos
   - `set_fill_color`: Establecer color de relleno
   - `set_stroke_color`: Establecer color de borde
   - `move_node`: Mover nodo
@@ -142,7 +142,7 @@ Se ha completado la organización de las herramientas en archivos separados seg�
   - `set_effects`: Establecer efectos
   - `set_effect_style_id`: Aplicar estilo de efecto
 
-- **text-tools.ts**: Contiene herramientas específicas para trabajar con texto
+- **text-tools.ts**: Texto
   - `set_text_content`: Establecer contenido de texto
   - `set_multiple_text_contents`: Establecer múltiples contenidos de texto
   - `set_font_name`: Establecer nombre de fuente
@@ -156,16 +156,16 @@ Se ha completado la organización de las herramientas en archivos separados seg�
   - `get_styled_text_segments`: Obtener segmentos de texto con estilos
   - `load_font_async`: Cargar fuente asíncronamente
 
-- **component-tools.ts**: Contiene herramientas para trabajar con componentes
+- **component-tools.ts**: Componentes
   - `create_component_instance`: Crear instancia de componente
 
-Además, se ha creado un archivo **index.ts** que exporta todas las categorías de herramientas y proporciona una función unificada `registerTools` para registrar todas las herramientas a la vez.
+Un **index.ts** exporta todas las categorías y da una función `registerTools` que registra todo de una vez.
 
-Esta organización por categorías facilita:
-1. Ubicar rápidamente herramientas relacionadas
-2. Mantener y actualizar código relacionado en un solo lugar
-3. Reutilizar funcionalidades comunes entre herramientas similares
-4. Escalar el proyecto añadiendo nuevas herramientas en sus categorías correspondientes
+Esta organización permite:
+1. Encontrar rápido las herramientas afines
+2. Mantener el código afín en un solo lugar
+3. Reutilizar lo común entre herramientas parecidas
+4. Crecer añadiendo herramientas a su categoría
 
 ## Punto 5: Organizar Prompts ✅
 
@@ -177,36 +177,36 @@ Esta organización por categorías facilita:
 ### Cambios realizados:
 
 #### 1. Creación del archivo `prompts/index.ts`:
-- Extraídos los tres prompts del archivo original:
-  - `design_strategy`: Mejores prácticas para trabajar con diseños de Figma
-  - `read_design_strategy`: Mejores prácticas para leer diseños de Figma
-  - `text_replacement_strategy`: Enfoque sistemático para reemplazar texto en diseños de Figma
-- Implementación de una función principal `registerPrompts` que registra todos los prompts a la vez
-- Exportación de funciones individuales para registrar cada prompt por separado si fuera necesario:
+- Los tres prompts del archivo original:
+  - `design_strategy`: Buenas prácticas para diseños de Figma
+  - `read_design_strategy`: Buenas prácticas para leer diseños de Figma
+  - `text_replacement_strategy`: Método para reemplazar texto en diseños de Figma
+- Una función `registerPrompts` registra todos los prompts de una vez
+- Funciones individuales por si hace falta registrar un prompt suelto:
   - `registerDesignStrategyPrompt`
   - `registerReadDesignStrategyPrompt`
   - `registerTextReplacementStrategyPrompt`
 
 ### Decisiones de diseño:
-- **Organización centralizada**: Todos los prompts están en un único archivo para facilitar su mantenimiento
-- **Función unificada**: La función `registerPrompts` permite registrar todos los prompts con una sola llamada
-- **Funciones individuales**: También se exportan funciones para cada prompt individual por si se necesita más flexibilidad
-- **Documentación mejorada**: Se ha añadido documentación JSDoc para explicar el propósito del módulo y sus funciones
+- **Un archivo**: Todos los prompts juntos, más fáciles de mantener
+- **Función unificada**: `registerPrompts` registra todo con una llamada
+- **Funciones individuales**: Por si hace falta más flexibilidad
+- **Documentación**: JSDoc explica el módulo y sus funciones
 
 ### Mejoras realizadas:
-- Centralización de todos los prompts en un único módulo
-- Facilidad para añadir nuevos prompts en el futuro
-- Mejora de la documentación mediante JSDoc
+- Todos los prompts en un módulo
+- Añadir prompts será fácil
+- JSDoc
 
 ### Próximos pasos:
-- Refactorizar el archivo principal `server.ts` para utilizar los prompts extraídos
-- Considerar si se necesitan más categorías de prompts para organizar mejor el código si crece
-- Explorar la posibilidad de cargar prompts desde archivos externos para mayor flexibilidad
+- Refactorizar `server.ts` para usar los prompts extraídos
+- Ver si hacen falta más categorías de prompts cuando crezca
+- Estudiar cargar prompts desde archivos externos
 
 ### Impacto en el código existente:
-- El archivo principal `server.ts` se simplificará al extraer la definición de prompts
-- Se mantiene la funcionalidad exacta de los prompts originales
-- La interfaz para añadir nuevos prompts es clara y consistente
+- `server.ts` se simplifica al sacar los prompts
+- Los prompts hacen exactamente lo mismo
+- Añadir prompts queda claro y uniforme
 
 ## Punto 6: Refactorizar el Archivo Principal ✅
 
@@ -218,36 +218,36 @@ Esta organización por categorías facilita:
 ### Cambios realizados:
 
 #### 1. Refactorización del archivo `server.ts`:
-- Reducción del archivo de más de 2500 líneas a aproximadamente 50 líneas
-- Implementación de un nuevo punto de entrada principal que:
+- El archivo baja de más de 2500 líneas a unas 50
+- El nuevo punto de entrada:
   - Importa la configuración desde `config/config.ts`
   - Importa las utilidades desde `utils/logger.ts` y `utils/websocket.ts`
   - Importa la función `registerTools` desde `tools/index.ts`
   - Importa la función `registerPrompts` desde `prompts/index.ts`
-  - Inicializa el servidor MCP con la configuración importada
-  - Registra todas las herramientas y prompts usando las funciones importadas
+  - Inicia el servidor MCP con la configuración importada
+  - Registra herramientas y prompts con las funciones importadas
   - Intenta conectar con Figma
   - Inicia el servidor MCP con el transporte stdio
 
 ### Decisiones de diseño:
-- **Punto de entrada mínimo**: El archivo principal ahora solo contiene el código necesario para inicializar y configurar el servidor, delegando toda la funcionalidad a módulos especializados
-- **Inicialización ordenada**: La secuencia de inicialización es clara y sigue un orden lógico: crear servidor → registrar herramientas → registrar prompts → conectar con Figma → iniciar servidor
-- **Manejo de errores robusto**: Se han implementado bloques try-catch a múltiples niveles para garantizar que los errores se manejen adecuadamente
-- **Documentación mejorada**: Se han añadido comentarios explicativos para cada sección del código
+- **Punto de entrada mínimo**: Solo inicia y configura el servidor; el resto vive en los módulos
+- **Orden claro**: crear servidor → registrar herramientas → registrar prompts → conectar con Figma → iniciar
+- **Errores**: try-catch a varios niveles
+- **Documentación**: Comentarios por sección
 
 ### Mejoras realizadas:
-- **Reducción significativa de tamaño**: El archivo principal se ha reducido aproximadamente un 98%
-- **Mayor claridad**: La estructura del servidor y su inicialización ahora son mucho más fáciles de entender
-- **Mejor separación de responsabilidades**: Cada parte del código ahora reside en su módulo correspondiente
-- **Mantenibilidad mejorada**: Cualquier cambio futuro requerirá modificar solo el módulo específico, no el archivo principal
+- **Tamaño**: El archivo principal cae un 98%
+- **Claridad**: La estructura y el arranque se entienden mejor
+- **Responsabilidades**: Cada parte en su módulo
+- **Mantenibilidad**: Un cambio futuro toca su módulo, no el archivo principal
 
 ### Próximos pasos:
-- Realizar pruebas exhaustivas para verificar que el servidor funciona correctamente con la nueva estructura
-- Considerar la creación de scripts de construcción específicos para la nueva estructura
-- Evaluar la necesidad de pruebas unitarias para cada módulo
-- Actualizar la documentación del proyecto para reflejar la nueva arquitectura
+- Probar a fondo el servidor con la nueva estructura
+- Ver si hacen falta scripts de build para la nueva estructura
+- Ver si hacen falta pruebas unitarias por módulo
+- Actualizar la documentación a la nueva arquitectura
 
 ### Impacto en el código existente:
-- El comportamiento externo del servidor se mantiene exactamente igual
-- Los clientes que utilicen el servidor no deberían notar ninguna diferencia
-- La nueva estructura facilitará enormemente futuras ampliaciones y modificaciones
+- El servidor se comporta exactamente igual por fuera
+- Los clientes no notarán nada
+- La nueva estructura hará fáciles las ampliaciones

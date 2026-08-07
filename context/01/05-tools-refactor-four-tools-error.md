@@ -1,19 +1,19 @@
 # Problemas y Soluciones para las 4 Herramientas Fallidas tras la Refactorización
 
-Durante las pruebas realizadas con Claude, se identificaron 4 herramientas que no funcionan correctamente después de la refactorización:
+Las pruebas con Claude encontraron 4 herramientas rotas tras la refactorización:
 
 - ✅ `get_remote_components` - Falla con error "method not available" (RESUELTO)
 - ✅ `flatten_node` - Falla con timeout error (RESUELTO)
 - ✅ `create_component_instance` - Falla con timeout error (RESUELTO)
 - ✅ `set_effect_style_id` - Falla con timeout error (RESUELTO)
 
-A continuación, se presenta un análisis detallado de cada problema y las soluciones propuestas.
+Cada problema y su solución, por orden.
 
 ## 1. Herramienta `get_remote_components` (RESUELTO)
 
 ### Análisis del Problema
 
-La herramienta `get_remote_components` estaba fallando con el error "method not available". Al examinar el código en `code.js`, encontramos:
+`get_remote_components` fallaba con "method not available". En `code.js`:
 
 ```javascript
 async function getRemoteComponents() {
@@ -37,13 +37,13 @@ async function getRemoteComponents() {
 }
 ```
 
-Con esta modificación, ahora cuando la API no está disponible, se lanza correctamente una excepción que es capturada por el servidor MCP y mostrada adecuadamente al usuario.
+Con este cambio, si la API falta, la excepción se lanza, el servidor MCP la captura y el usuario la ve.
 
 ## 2. Herramienta `flatten_node` (RESUELTO)
 
 ### Análisis del Problema
 
-La herramienta `flatten_node` estaba fallando con un timeout error cuando se intentaba aplanar nodos vectoriales complejos. Al examinar la implementación del plugin de Figma, observamos:
+`flatten_node` fallaba con timeout al aplanar vectores complejos. En el plugin:
 
 ```javascript
 async function flattenNode(params) {
@@ -119,45 +119,45 @@ async function flattenNode(params) {
 }
 ```
 
-Las mejoras incluyen:
-1. Un timeout de 8 segundos para evitar bloqueos indefinidos.
-2. Ejecución de la operación de flatten en una nueva promesa con un pequeño retraso para permitir actualizaciones de la UI.
-3. Uso de `Promise.race` para implementar la carrera entre la operación y el timeout.
-4. Limpieza adecuada del timeout para evitar fugas de memoria.
-5. Mensajes de error mejorados que proporcionan sugerencias útiles cuando ocurre un timeout.
-6. Logging adicional para facilitar la depuración.
+Las mejoras:
+1. Timeout de 8 segundos contra bloqueos sin fin.
+2. El flatten corre en una promesa con un pequeño retraso, para que la UI respire.
+3. `Promise.race` entre la operación y el timeout.
+4. El timeout se limpia, sin fugas de memoria.
+5. Los errores de timeout sugieren qué hacer.
+6. Más logging para depurar.
 
 ### Resultados
 
-La implementación ha sido probada con éxito. Ahora la herramienta:
-- Funciona correctamente para nodos simples
-- Muestra un error descriptivo con sugerencias útiles cuando el nodo es demasiado complejo
-- Evita bloquear la interfaz de Figma durante operaciones largas
-- Proporciona mejor feedback para depuración a través de logs
+Probado. La herramienta ahora:
+- Funciona con nodos simples
+- Da un error claro, con sugerencias, cuando el nodo es demasiado complejo
+- No bloquea Figma en operaciones largas
+- Deja mejores logs para depurar
 
 ## 3. Herramienta `create_component_instance` (RESUELTO)
 
 ### Problema Identificado
 
-Durante las pruebas de la herramienta `create_component_instance`, se identificó un problema de robustez:
+En las pruebas de `create_component_instance` apareció un problema de robustez:
 
-- Al intentar crear instancias de componentes complejos o remotos, la operación podía bloquearse o tardar demasiado tiempo
-- No existía un mecanismo de timeout para manejar operaciones que se extendían demasiado
-- Los mensajes de error no eran suficientemente descriptivos para diagnosticar problemas comunes
+- Con componentes complejos o remotos, la operación podía colgarse o tardar demasiado
+- No había timeout
+- Los errores no bastaban para diagnosticar los problemas comunes
 
-Este comportamiento podía generar bloqueos en la interfaz de Figma o en el procesamiento de comandos subsecuentes.
+Esto podía bloquear Figma o los comandos siguientes.
 
 ### Análisis del Problema
 
-Tras revisar el código, identificamos que:
+Del código:
 
-1. La función `importComponentByKeyAsync` puede tomar un tiempo considerable para componentes complejos o cuando hay problemas de red
-2. No existía un mecanismo de timeout para interrumpir operaciones que tomaran demasiado tiempo
-3. La estructura de manejo de errores no distinguía entre diferentes tipos de fallas (componente no encontrado, permisos insuficientes, etc.)
+1. `importComponentByKeyAsync` puede tardar mucho con componentes complejos o mala red
+2. No había timeout que cortara las operaciones largas
+3. Los errores no distinguían el tipo de falla (componente no encontrado, permisos, etc.)
 
 ### Solución Implementada
 
-Aplicamos un patrón similar al utilizado en la función `flattenNode` para mejorar la robustez:
+El mismo patrón que en `flattenNode`:
 
 ```javascript
 async function createComponentInstance(params) {
@@ -185,7 +185,7 @@ async function createComponentInstance(params) {
         clearTimeout(timeoutId); // Clear the timeout
       });
 
-    // Create instance and set properties in a separate try block
+    // Instancia y propiedades en su propio try
     try {
       const instance = component.createInstance();
       instance.x = x;
@@ -205,7 +205,7 @@ async function createComponentInstance(params) {
       throw new Error(`Error creating component instance: ${instanceError.message}`);
     }
   } catch (error) {
-    // Proporcionar mensajes de error más descriptivos según el tipo de error
+    // Mensajes de error según el tipo de fallo
     if (error.message.includes("timeout") || error.message.includes("Timeout")) {
       throw new Error(`The component import timed out after 10 seconds. This usually happens with complex remote components or network issues. Try again later or use a simpler component.`);
     } else if (error.message.includes("not found") || error.message.includes("Not found")) {
@@ -221,19 +221,19 @@ async function createComponentInstance(params) {
 
 ### Cambios Clave Implementados:
 
-1. **Mecanismo de timeout**: Implementamos un timeout de 10 segundos para evitar bloqueos indefinidos
-2. **Separación de fases**: Dividimos el proceso en dos fases (importación y creación de instancia) para mejor diagnóstico de errores
-3. **Mensajes de error mejorados**: Agregamos mensajes de error específicos según el tipo de problema encontrado
-4. **Limpieza de recursos**: Implementamos un bloque `finally` para garantizar que los timeouts se limpien adecuadamente
+1. **Timeout**: 10 segundos contra bloqueos sin fin
+2. **Dos fases**: Importación y creación de instancia separadas, para diagnosticar mejor
+3. **Errores**: Mensajes por tipo de problema
+4. **Limpieza**: Un `finally` limpia los timeouts
 
 ### Impacto del Cambio
 
-Esta mejora garantiza que:
+Con esta mejora:
 
-- La herramienta no se bloqueará indefinidamente en componentes problemáticos
-- El usuario recibirá mensajes de error más claros y acciones sugeridas
-- Se facilita la depuración de problemas con componentes
-- Se mejora la robustez general del sistema
+- La herramienta no se cuelga con componentes problemáticos
+- El usuario recibe errores claros con acciones sugeridas
+- Depurar componentes es más fácil
+- El sistema aguanta más
 
 ### Estado de Validación
 
@@ -242,24 +242,24 @@ Esta mejora garantiza que:
 
 ### Lecciones Aprendidas
 
-Esta mejora refuerza la importancia de:
+Esta mejora enseña:
 
-1. **Implementar timeouts**: Las operaciones asíncronas siempre deben tener un mecanismo de timeout para evitar bloqueos
-2. **Mensajes de error descriptivos**: Proporcionar información específica sobre el problema y sugerir soluciones
-3. **División de procesos complejos**: Separar operaciones grandes en pasos más pequeños facilita el diagnóstico de problemas
-4. **Limpieza de recursos**: Garantizar que los recursos como timers se liberen adecuadamente
+1. **Timeouts**: Toda operación asíncrona necesita uno
+2. **Errores claros**: Decir qué pasó y sugerir la salida
+3. **Pasos pequeños**: Las operaciones grandes se diagnostican mejor partidas
+4. **Limpieza**: Liberar los timers y demás recursos
 
-Este enfoque debería aplicarse a otras herramientas que realicen operaciones potencialmente lentas o que puedan fallar de diferentes maneras.
+Este patrón vale para cualquier herramienta lenta o con varios modos de fallo.
 
 ## 4. Herramienta `set_effect_style_id` (RESUELTO)
 
 ### Análisis del Problema
 
-La herramienta `set_effect_style_id` estaba fallando con un timeout error. Como problema similar al de los componentes, este error podría ocurrir si la aplicación de estilos de efectos es una operación pesada o si la API tiene problemas.
+`set_effect_style_id` fallaba con timeout. Como con los componentes: aplicar estilos de efecto pesa, o la API falla.
 
 ### Solución Implementada
 
-Se ha implementado una versión robusta con timeout y manejo de errores:
+La versión nueva lleva timeout y manejo de errores:
 
 ```javascript
 // Set Effect Style ID Tool
@@ -275,7 +275,7 @@ async function setEffectStyleId(params) {
   }
   
   try {
-    // Set up timeout
+    // Timeout
     let timeoutId;
     const timeoutPromise = new Promise((_, reject) => {
       timeoutId = setTimeout(() => {
@@ -283,19 +283,19 @@ async function setEffectStyleId(params) {
       }, 8000);
     });
     
-    // Get node and perform operation
+    // Nodo y operación
     const applyStylePromise = (async () => {
       const node = await figma.getNodeByIdAsync(nodeId);
       if (!node) {
         throw new Error(`Node not found with ID: ${nodeId}`);
       }
       
-      // Verificar que el nodo soporte efectos
+      // El nodo debe soportar efectos
       if (!("effectStyleId" in node)) {
         throw new Error(`Node with ID ${nodeId} does not support effect styles`);
       }
       
-      // Attempt to fetch the effect style first to validate it exists
+      // Comprobar primero que el estilo existe
       try {
         const effectStyle = await figma.getStyleByIdAsync(effectStyleId);
         if (!effectStyle || effectStyle.type !== "EFFECT") {
@@ -315,7 +315,7 @@ async function setEffectStyleId(params) {
       };
     })();
     
-    // Race the promises
+    // Carrera de promesas
     const result = await Promise.race([applyStylePromise, timeoutPromise])
       .finally(() => {
         clearTimeout(timeoutId);
@@ -331,26 +331,26 @@ async function setEffectStyleId(params) {
 
 ### Resultados
 
-La implementación ha sido probada con éxito. Ahora la herramienta:
-- Funciona correctamente para nodos simples
-- Muestra un error descriptivo con sugerencias útiles cuando el nodo o el estilo son inválidos
-- Evita bloqueos durante operaciones largas
-- Proporciona mejor feedback para depuración a través de logs
+Probado. La herramienta ahora:
+- Funciona con nodos simples
+- Da un error claro cuando el nodo o el estilo no valen
+- No se cuelga en operaciones largas
+- Deja mejores logs para depurar
 
 ## Resumen de las Soluciones
 
-Los problemas identificados con las cuatro herramientas tienen causas diferentes pero soluciones similares:
+Cuatro causas distintas, soluciones parecidas:
 
-1. **`get_remote_components`** (RESUELTO): Cambiada la devolución de objetos de error por excepciones para un manejo de errores consistente.
+1. **`get_remote_components`** (RESUELTO): Excepciones en vez de objetos de error.
 
-2. **`flatten_node`** (RESUELTO): Implementado un mecanismo de timeout y promesas en paralelo para evitar el bloqueo indefinido.
+2. **`flatten_node`** (RESUELTO): Timeout y promesas en paralelo contra los cuelgues.
 
-3. **`create_component_instance`** (RESUELTO): Implementado timeout para la operación de importación de componentes.
+3. **`create_component_instance`** (RESUELTO): Timeout en la importación de componentes.
 
-4. **`set_effect_style_id`** (RESUELTO): Implementado timeout y validación robusta para la aplicación de estilos de efectos.
+4. **`set_effect_style_id`** (RESUELTO): Timeout y validación al aplicar estilos de efecto.
 
 ## Próximos Pasos
 
-1. Revisar otras herramientas en busca de patrones similares que puedan causar timeouts
-2. Considerar la implementación de un sistema general de reportes de progreso para operaciones largas
-3. Desarrollar pruebas específicas para estas herramientas para verificar su funcionamiento después de los cambios
+1. Buscar en otras herramientas patrones que puedan dar timeout
+2. Pensar en informes de progreso generales para operaciones largas
+3. Escribir pruebas para estas herramientas tras los cambios

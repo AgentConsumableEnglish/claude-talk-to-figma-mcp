@@ -1,6 +1,6 @@
 # Pruebas de Herramientas Refactorizadas
 
-Este documento registra los resultados de las pruebas realizadas para verificar el funcionamiento correcto de todas las herramientas después de la refactorización.
+Resultados de las pruebas de todas las herramientas tras la refactorización.
 
 ## Configuración de Pruebas
 
@@ -12,7 +12,7 @@ Este documento registra los resultados de las pruebas realizadas para verificar 
 
 ## Plan de Pruebas
 
-Las pruebas se organizarán por categorías de herramientas:
+Pruebas por categoría de herramienta:
 
 1. **Herramientas de Documento** - Obtención de información del documento, selección, etc.
 2. **Herramientas de Creación** - Creación de formas, texto, frames, etc.
@@ -20,10 +20,10 @@ Las pruebas se organizarán por categorías de herramientas:
 4. **Herramientas de Texto** - Manipulación de texto y fuentes
 5. **Herramientas de Componentes** - Manipulación de componentes e instancias
 
-Para cada herramienta, registraremos:
+Para cada herramienta anotamos:
 - **Estado**: ✅ Funciona / ❌ Falla / ⚠️ Funciona con problemas
 - **Mensaje**: Descripción del resultado
-- **Detalles**: Información adicional si es necesario (errores, sugerencias, etc.)
+- **Detalles**: Más información si hace falta (errores, sugerencias)
 
 ## Resultados de las Pruebas
 
@@ -34,7 +34,7 @@ Para cada herramienta, registraremos:
 **Estado**: ✅ Funciona  
 **Comando**: `join_channel`  
 **Parámetros**: `{ "channel": "25jztws8" }`  
-**Resultado**: Conexión exitosa al canal de Figma  
+**Resultado**: Conectado al canal de Figma  
 **Mensaje recibido**: "Successfully joined channel: 25jztws8"
 
 #### 1.2 Obtener Información del Documento
@@ -42,16 +42,16 @@ Para cada herramienta, registraremos:
 **Estado**: ✅ Funciona  
 **Comando**: `get_document_info`  
 **Parámetros**: `{}`  
-**Resultado**: Se recibió correctamente la información del documento activo de Figma  
-**Detalles**: La respuesta incluye datos como documento ID, nombre, y estructura principal
+**Resultado**: Llegó la información del documento activo  
+**Detalles**: La respuesta trae ID, nombre y estructura principal
 
 #### 1.3 Obtener Selección Actual
 
 **Estado**: ✅ Funciona  
 **Comando**: `get_selection`  
 **Parámetros**: `{}`  
-**Resultado**: Se recibió información sobre los elementos seleccionados  
-**Detalles**: Funciona correctamente tanto con selecciones únicas como múltiples
+**Resultado**: Llegó la información de los elementos seleccionados  
+**Detalles**: Funciona con selecciones únicas y múltiples
 
 ### 2. Herramientas de Creación
 
@@ -60,16 +60,16 @@ Para cada herramienta, registraremos:
 **Estado**: ✅ Funciona  
 **Comando**: `create_rectangle`  
 **Parámetros**: `{ "x": 100, "y": 100, "width": 200, "height": 100 }`  
-**Resultado**: Rectángulo creado correctamente en las coordenadas especificadas  
-**Detalles**: El ID del nodo retornado puede usarse para manipulaciones posteriores
+**Resultado**: Rectángulo creado en las coordenadas pedidas  
+**Detalles**: El ID devuelto sirve para manipulaciones posteriores
 
 #### 2.2 Crear Texto
 
 **Estado**: ✅ Funciona  
 **Comando**: `create_text`  
 **Parámetros**: `{ "x": 100, "y": 250, "text": "Texto de prueba de herramientas refactorizadas" }`  
-**Resultado**: Elemento de texto creado con el contenido especificado  
-**Detalles**: La fuente predeterminada se aplica correctamente
+**Resultado**: Texto creado con el contenido pedido  
+**Detalles**: Aplica la fuente por defecto
 
 ### 3. Herramientas de Modificación
 
@@ -78,16 +78,16 @@ Para cada herramienta, registraremos:
 **Estado**: ✅ Funciona  
 **Comando**: `set_fill_color`  
 **Parámetros**: `{ "nodeId": "[ID_DEL_NODO_RECTÁNGULO]", "r": 0.8, "g": 0.2, "b": 0.2 }`  
-**Resultado**: Color de relleno cambiado correctamente al rojo especificado  
-**Detalles**: El cambio se aplica instantáneamente
+**Resultado**: Relleno cambiado al rojo pedido  
+**Detalles**: El cambio es inmediato
 
 #### 3.2 Mover Nodo
 
 **Estado**: ✅ Funciona  
 **Comando**: `move_node`  
 **Parámetros**: `{ "nodeId": "[ID_DEL_NODO_RECTÁNGULO]", "x": 300, "y": 300 }`  
-**Resultado**: Nodo movido correctamente a las nuevas coordenadas  
-**Detalles**: El movimiento respeta los límites del canvas
+**Resultado**: Nodo movido a las nuevas coordenadas  
+**Detalles**: Respeta los límites del canvas
 
 ### 4. Herramientas de Texto
 
@@ -97,15 +97,15 @@ Para cada herramienta, registraremos:
 **Comando**: `set_text_content`  
 **Parámetros**: `{ "nodeId": "[ID_DEL_NODO_TEXTO]", "text": "Texto actualizado después de la refactorización" }`  
 **Resultado**: Texto actualizado correctamente  
-**Detalles**: Mantiene el formato y estilo existentes
+**Detalles**: Mantiene formato y estilo
 
 #### 4.2 Cambiar Tamaño de Fuente
 
 **Estado**: ✅ Funciona  
 **Comando**: `set_font_size`  
 **Parámetros**: `{ "nodeId": "[ID_DEL_NODO_TEXTO]", "fontSize": 24 }`  
-**Resultado**: Tamaño de fuente actualizado correctamente  
-**Detalles**: El texto se redimensiona manteniendo su posición
+**Resultado**: Tamaño de fuente actualizado  
+**Detalles**: El texto cambia de tamaño sin moverse
 
 ### 5. Herramientas de Componentes
 
@@ -114,22 +114,22 @@ Para cada herramienta, registraremos:
 **Estado**: ⚠️ Funciona con advertencias  
 **Comando**: `create_component_instance`  
 **Parámetros**: `{ "componentKey": "[KEY_DE_COMPONENTE_EXISTENTE]", "x": 400, "y": 400 }`  
-**Resultado**: Instancia creada correctamente cuando existe el componente  
-**Detalles**: Requiere que existan componentes en el documento o bibliotecas conectadas
+**Resultado**: Instancia creada cuando el componente existe  
+**Detalles**: Pide componentes en el documento o en bibliotecas conectadas
 
 ## Resumen de Pruebas
 
-Todas las herramientas refactorizadas fueron probadas con éxito después de la corrección del problema del canal. La implementación del cambio en `join_channel` para usar la función `joinChannel` en lugar de `sendCommandToFigma` directamente ha solucionado el problema descrito en el documento de error.
+Todas las herramientas pasaron tras corregir el problema del canal. `join_channel` ahora usa `joinChannel` en vez de `sendCommandToFigma` directo, y eso arregla el error documentado.
 
 ### Hallazgos Clave
 
-1. **Canal persistente**: Una vez unido al canal, todas las herramientas funcionan correctamente sin necesidad de volver a unirse.
-2. **Rendimiento estable**: No se observó degradación de rendimiento después de la refactorización.
-3. **Manejo de errores mejorado**: Los mensajes de error son más claros y descriptivos.
+1. **Canal persistente**: Unido una vez, todas las herramientas funcionan sin volver a unirse.
+2. **Rendimiento estable**: La refactorización no lo degradó.
+3. **Errores**: Mensajes más claros.
 
 ## Conclusiones
 
-La refactorización de las herramientas ha sido exitosa. La nueva estructura modular no solo mantiene la funcionalidad completa sino que además facilita el mantenimiento y la comprensión del código. La corrección implementada para el problema del canal ha sido efectiva, permitiendo que todas las herramientas funcionen correctamente en secuencia.
+La refactorización funciona. La estructura modular mantiene toda la funcionalidad y hace el código más fácil de mantener y entender. Con el canal corregido, todas las herramientas funcionan en secuencia.
 
 ## Estado de Validación
 

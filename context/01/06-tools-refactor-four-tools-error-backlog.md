@@ -1,16 +1,16 @@
 # Backlog de Soluciones para las Herramientas Fallidas
 
-Este documento registra las soluciones implementadas y las pendientes para las herramientas que presentaban fallos después de la refactorización.
+Soluciones hechas y pendientes para las herramientas que fallaban tras la refactorización.
 
 ## 1. Herramienta `get_remote_components` - RESUELTO ✅
 
 **Fecha de solución**: 4 de mayo de 2025
 
 **Problema detectado**: 
-La herramienta fallaba con el error "method not available" cuando la API de `figma.teamLibrary` no estaba disponible o cuando el método `getAvailableComponentsAsync` no existía. Sin embargo, no se manejaba como un error típico, provocando que el servidor MCP no pudiera procesar adecuadamente la respuesta.
+Fallaba con "method not available" cuando faltaba la API `figma.teamLibrary` o el método `getAvailableComponentsAsync`. No se trataba como un error normal, y el servidor MCP no podía procesar la respuesta.
 
 **Causa raíz**:
-La implementación original devolvía un objeto con flags de error en lugar de lanzar excepciones:
+El original devolvía un objeto con flags de error en vez de lanzar excepciones:
 
 ```javascript
 if (!figma.teamLibrary) {
@@ -23,10 +23,10 @@ if (!figma.teamLibrary) {
 }
 ```
 
-El servidor MCP está diseñado para manejar excepciones lanzadas por las funciones, pero no para interpretar objetos con propiedades de error personalizadas. Esto resultaba en que el error no se mostraba correctamente al usuario.
+El servidor MCP maneja excepciones, no objetos de error a medida. El usuario no veía el error.
 
 **Solución implementada**:
-Se modificó la implementación para lanzar excepciones explícitas en lugar de devolver objetos de error:
+Ahora se lanzan excepciones en vez de devolver objetos de error:
 
 ```javascript
 if (!figma.teamLibrary) {
@@ -35,7 +35,7 @@ if (!figma.teamLibrary) {
 }
 ```
 
-También se añadió un mecanismo de timeout para evitar que la operación se quedara bloqueada indefinidamente:
+También se añadió un timeout para que la operación no se cuelgue:
 
 ```javascript
 // Set up a manual timeout to detect deadlocks
@@ -57,38 +57,38 @@ const teamComponents = await Promise.race([fetchPromise, timeoutPromise])
 ```
 
 **Beneficios de la solución**:
-1. **Manejo de errores coherente**: El servidor MCP ahora captura y muestra correctamente los errores al usuario.
-2. **Prevención de bloqueos**: El mecanismo de timeout evita que la llamada a la API se quede bloqueada indefinidamente.
-3. **Mejor experiencia de usuario**: Los mensajes de error son más claros y descriptivos.
-4. **Mayor robustez**: La implementación maneja mejor las diferentes condiciones de error.
+1. **Errores coherentes**: El servidor MCP captura y muestra los errores.
+2. **Sin cuelgues**: El timeout corta la llamada a la API.
+3. **Usuario**: Mensajes de error más claros.
+4. **Robustez**: Maneja mejor los distintos errores.
 
 **Lecciones aprendidas**:
-1. Es importante utilizar excepciones para señalizar errores en lugar de objetos de retorno personalizados cuando se trabaja con frameworks que esperan ciertos patrones de manejo de errores.
-2. Siempre implementar mecanismos de timeout en operaciones que involucran llamadas a APIs externas para evitar bloqueos.
-3. Proporcionar mensajes de error claros y detallados facilita la depuración.
+1. Con frameworks que esperan excepciones, señala los errores con excepciones, no con objetos a medida.
+2. Toda llamada a una API externa lleva timeout.
+3. Los errores claros aceleran la depuración.
 
 ## 2. Herramienta `flatten_node` - RESUELTO ✅
 
 **Fecha de solución**: 4 de mayo de 2025
 
 **Problema detectado**:
-La herramienta `flatten_node` fallaba con timeout errors al intentar aplanar nodos vectoriales complejos. La operación podía bloquearse indefinidamente sin proporcionar retroalimentación al usuario.
+`flatten_node` fallaba con timeout al aplanar vectores complejos. Podía colgarse sin avisar al usuario.
 
 **Causa raíz**:
-La operación `flatten()` de la API de Figma puede ser computacionalmente intensiva, especialmente para nodos vectoriales complejos (como operaciones booleanas complicadas o vectores con muchos puntos). La implementación original no tenía un mecanismo de timeout ni manejo de operaciones de larga duración:
+`flatten()` puede pesar mucho con vectores complejos (booleanas complicadas, vectores con muchos puntos). El original no tenía timeout ni trato para operaciones largas:
 
 ```javascript
-// Implementación original problemática
+// El original, problemático
 const flattened = node.flatten();
 ```
 
-Esto podía resultar en que:
-1. La interfaz de Figma pareciera congelada
-2. La operación no completara dentro del tiempo de timeout del servidor MCP
-3. La falta de feedback al usuario sobre el progreso o problemas
+Con esto:
+1. Figma parecía congelado
+2. La operación no acababa dentro del timeout del servidor MCP
+3. El usuario no sabía nada del progreso ni de los problemas
 
 **Solución implementada**:
-Se ha implementado un sistema robusto de manejo de timeout y promesas en paralelo, junto con mejor feedback al usuario:
+Timeout y promesas en paralelo, con mejor aviso al usuario:
 
 ```javascript
 // Implement a timeout mechanism
@@ -123,7 +123,7 @@ const flattened = await Promise.race([flattenPromise, timeoutPromise])
   });
 ```
 
-Además, se mejoró el manejo de errores para proporcionar mensajes más útiles al usuario:
+Y errores más útiles:
 
 ```javascript
 catch (error) {
@@ -138,56 +138,56 @@ catch (error) {
 ```
 
 **Beneficios de la solución**:
-1. **Prevención de bloqueos indefinidos**: La operación ahora tiene un límite de tiempo definido (8 segundos)
-2. **Mejor experiencia de usuario**: Se proporcionan mensajes de error detallados con sugerencias cuando ocurre un timeout
-3. **No bloqueo de la UI**: La ejecución diferida permite que la interfaz de Figma siga respondiendo
-4. **Evita fugas de memoria**: Limpieza adecuada de recursos después de la operación
-5. **Mejor depuración**: Mayor cantidad de logs para facilitar la identificación de problemas
+1. **Sin cuelgues**: Límite de 8 segundos
+2. **Usuario**: Errores con sugerencias en los timeouts
+3. **UI viva**: La ejecución diferida deja respirar a Figma
+4. **Sin fugas**: Los recursos se limpian al acabar
+5. **Depuración**: Más logs
 
 **Lecciones aprendidas**:
-1. Las operaciones potencialmente largas en plugins de Figma deben implementar mecanismos de timeout
-2. El uso de `Promise.race` es una técnica efectiva para limitar el tiempo de operaciones asíncronas
-3. Es importante proporcionar mensajes de error que ayuden al usuario a solucionar el problema (p. ej., "intenta simplificar el nodo")
-4. El logging detallado facilita la depuración de problemas en producción
-5. Ejecutar operaciones intensivas en un tick separado (con setTimeout(fn, 0)) permite que la UI siga respondiendo
+1. Las operaciones largas en plugins de Figma llevan timeout
+2. `Promise.race` limita bien el tiempo de una operación asíncrona
+3. Los errores deben ayudar a salir del problema (p. ej., "intenta simplificar el nodo")
+4. El logging detallado ayuda en producción
+5. Un tick separado (setTimeout(fn, 0)) deja la UI viva
 
 **Impacto en otras herramientas**:
-Esta solución sirve como patrón para otras herramientas con problemas similares, como `create_component_instance` y `set_effect_style_id`. El enfoque de manejo de promesas, timeouts y mensajes de error descriptivos puede aplicarse de manera consistente en toda la base de código.
+Este patrón vale para `create_component_instance` y `set_effect_style_id`, y para toda la base de código.
 
 ## 3. Herramienta `create_component_instance` - RESUELTO ✅
 
 **Fecha de solución**: 4 de mayo de 2025
 
 **Problema detectado**:
-Durante las pruebas de la herramienta `create_component_instance`, se identificó que:
+En las pruebas de `create_component_instance`:
 
-1. **Bloqueos potenciales**: Al importar componentes complejos o remotos, la operación podía bloquearse indefinidamente
-2. **Falta de timeout**: No existía un mecanismo para limitar el tiempo de espera en operaciones lentas
-3. **Errores no descriptivos**: Los mensajes de error no proporcionaban suficiente contexto para diagnosticar problemas comunes
+1. **Cuelgues**: Importar componentes complejos o remotos podía colgarse
+2. **Sin timeout**: Nada limitaba la espera
+3. **Errores pobres**: Sin contexto para diagnosticar lo común
 
 **Solución implementada**:
-Se ha mejorado la función `createComponentInstance` en el archivo `code.js` del plugin de Figma con las siguientes adiciones:
+`createComponentInstance` en `code.js` gana:
 
 1. **Sistema de timeout**: 
-   - Se implementó un timeout de 10 segundos usando `Promise.race()`
-   - Esto evita bloqueos indefinidos cuando hay problemas con los componentes
-   - Se limpian adecuadamente los timeouts para prevenir fugas de memoria
+   - Timeout de 10 segundos con `Promise.race()`
+   - Corta los cuelgues cuando un componente falla
+   - Los timeouts se limpian, sin fugas
 
 2. **Separación de la lógica**:
-   - Se dividió el proceso en dos fases separadas (importación y creación de instancia)
-   - Esto permite diagnosticar con mayor precisión la fuente de los errores
+   - Dos fases: importación y creación de instancia
+   - Así el error señala su fase
 
 3. **Mensajes de error enriquecidos**:
-   - Se implementaron mensajes personalizados según el tipo de error
-   - Se agregaron sugerencias de acciones correctivas para el usuario
-   - Se clasifican errores por categorías: timeout, componente no encontrado, permisos insuficientes, etc.
+   - Mensajes por tipo de error
+   - Sugerencias de acción para el usuario
+   - Categorías: timeout, componente no encontrado, permisos, etc.
 
 4. **Logging mejorado**:
-   - Se añadieron logs detallados para facilitar la depuración
-   - Se registran eventos clave como inicio y finalización de la importación
+   - Logs detallados
+   - Registra inicio y fin de la importación
 
 **Detalles de Implementación**:
-El núcleo de la solución se basa en el uso de promesas en competencia (con `Promise.race`) para establecer un límite de tiempo:
+El núcleo: promesas en competencia (`Promise.race`) con límite de tiempo:
 
 ```javascript
 // Set up a manual timeout to detect long operations
@@ -208,10 +208,10 @@ const component = await Promise.race([importPromise, timeoutPromise])
   });
 ```
 
-Para mejorar el diagnóstico, se implementó un sistema de detección de tipos de error:
+Para el diagnóstico, detección del tipo de error:
 
 ```javascript
-// Proporcionar mensajes de error más descriptivos según el tipo de error
+// Mensajes según el tipo de error
 if (error.message.includes("timeout") || error.message.includes("Timeout")) {
   throw new Error(`The component import timed out after 10 seconds...`);
 } else if (error.message.includes("not found") || error.message.includes("Not found")) {
@@ -222,49 +222,49 @@ if (error.message.includes("timeout") || error.message.includes("Timeout")) {
 ```
 
 **Beneficios de la solución**:
-1. **Prevención de bloqueos**: La herramienta ya no se queda bloqueada indefinidamente
-2. **Mejor diagnóstico**: Los mensajes de error indican específicamente qué puede estar fallando
-3. **Sugerencias útiles**: El usuario recibe orientación sobre cómo resolver problemas 
-4. **Mayor robustez**: La herramienta maneja de forma elegante condiciones de error
+1. **Sin cuelgues**
+2. **Diagnóstico**: El error dice qué falla
+3. **Sugerencias**: El usuario sabe por dónde salir
+4. **Robustez**: Los errores no la tiran
 
 **Pruebas y Validación**:
-- Se ha probado la herramienta con componentes locales y verificado su funcionamiento
-- Se ha validado el comportamiento de timeout con componentes problemáticos
-- Se han verificado los distintos mensajes de error y su utilidad
+- Probada con componentes locales
+- Timeout validado con componentes problemáticos
+- Mensajes de error comprobados
 
 **Impacto en el Código**:
-La modificación es autocontenida y no afecta a otras partes del código. Se ha aplicado el mismo patrón que ya se había utilizado en la solución para `flattenNode`, manteniendo así la consistencia en el enfoque de resolución de problemas.
+El cambio queda contenido y no toca el resto. Es el mismo patrón de `flattenNode`.
 
 **Lecciones aprendidas**:
-Esta mejora refuerza varios principios importantes de desarrollo:
+Principios que refuerza:
 
-1. Las operaciones asíncronas deben tener siempre un mecanismo de timeout
-2. Los mensajes de error deben ser específicos y orientados a soluciones
-3. La separación de operaciones complejas facilita el diagnóstico
-4. Es crucial liberar recursos para evitar fugas de memoria
+1. Toda operación asíncrona lleva timeout
+2. Los errores deben ser concretos y apuntar a la salida
+3. Partir las operaciones complejas ayuda a diagnosticar
+4. Liberar recursos, sin fugas
 
-Este mismo patrón de solución podría aplicarse a otras herramientas que realicen operaciones costosas o con potencial de bloqueo.
+El patrón vale para cualquier herramienta costosa o con riesgo de cuelgue.
 
 ## 4. Herramienta `set_effect_style_id` - RESUELTO ✅
 
 **Fecha de solución**: 4 de mayo de 2025
 
 **Problema detectado**:
-La herramienta `set_effect_style_id` presentaba los siguientes problemas:
+`set_effect_style_id` tenía estos problemas:
 
-1. **Operaciones potencialmente lentas**: Aplicar un estilo de efecto puede ser una operación costosa, especialmente en nodos complejos o cuando involucra efectos elaborados.
+1. **Lentitud**: Aplicar un estilo de efecto pesa, sobre todo en nodos complejos o con efectos elaborados.
 
-2. **Sin manejo de timeout**: La implementación original no tenía un mecanismo para limitar el tiempo de espera, lo que podía resultar en:
-   - Bloqueos indefinidos del plugin
-   - Fallos silenciosos sin retroalimentación al usuario
-   - Comportamiento impredecible del servidor MCP
+2. **Sin timeout**: Nada limitaba la espera, y eso daba:
+   - Cuelgues del plugin
+   - Fallos silenciosos, sin aviso al usuario
+   - Un servidor MCP impredecible
 
-3. **Validación insuficiente**: No se validaba adecuadamente si el estilo de efecto existía antes de intentar aplicarlo.
+3. **Poca validación**: No se comprobaba que el estilo existiera antes de aplicarlo.
 
-4. **Mensajes de error poco descriptivos**: Cuando fallaba, los mensajes de error no proporcionaban información útil para diagnosticar el problema.
+4. **Errores pobres**: Al fallar, el mensaje no ayudaba a diagnosticar.
 
 **Solución implementada**:
-Se ha creado una versión mejorada de la función `setEffectStyleId` que incorpora las siguientes mejoras:
+La versión nueva de `setEffectStyleId`:
 
 ```javascript
 async function setEffectStyleId(params) {
@@ -279,7 +279,7 @@ async function setEffectStyleId(params) {
   }
   
   try {
-    // Set up a manual timeout to detect long operations
+    // Timeout manual contra operaciones largas
     let timeoutId;
     const timeoutPromise = new Promise((_, reject) => {
       timeoutId = setTimeout(() => {
@@ -289,7 +289,7 @@ async function setEffectStyleId(params) {
     
     console.log(`Starting to set effect style ID ${effectStyleId} on node ${nodeId}...`);
     
-    // Get node and validate in a promise
+    // Nodo y validación en una promesa
     const nodePromise = (async () => {
       const node = await figma.getNodeByIdAsync(nodeId);
       if (!node) {
@@ -300,7 +300,7 @@ async function setEffectStyleId(params) {
         throw new Error(`Node with ID ${nodeId} does not support effect styles`);
       }
       
-      // Try to validate the effect style exists before applying
+      // Comprobar que el estilo existe antes de aplicarlo
       console.log(`Fetching effect styles to validate style ID: ${effectStyleId}`);
       const effectStyles = await figma.getLocalEffectStylesAsync();
       const foundStyle = effectStyles.find(style => style.id === effectStyleId);
@@ -311,7 +311,7 @@ async function setEffectStyleId(params) {
       
       console.log(`Effect style found, applying to node...`);
       
-      // Apply the effect style to the node
+      // Aplicar el estilo al nodo
       node.effectStyleId = effectStyleId;
       
       return {
@@ -322,10 +322,10 @@ async function setEffectStyleId(params) {
       };
     })();
     
-    // Race between the node operation and the timeout
+    // Carrera entre la operación y el timeout
     const result = await Promise.race([nodePromise, timeoutPromise])
       .finally(() => {
-        // Clear the timeout to prevent memory leaks
+        // Limpiar el timeout, sin fugas
         clearTimeout(timeoutId);
       });
     
@@ -335,7 +335,7 @@ async function setEffectStyleId(params) {
     console.error(`Error setting effect style ID: ${error.message || "Unknown error"}`);
     console.error(`Stack trace: ${error.stack || "Not available"}`);
     
-    // Proporcionar mensajes de error específicos para diferentes casos
+    // Mensajes de error por caso
     if (error.message.includes("timeout") || error.message.includes("Timeout")) {
       throw new Error(`The operation timed out after 8 seconds. This could happen with complex nodes or effects. Try with a simpler node or effect style.`);
     } else if (error.message.includes("not found") && error.message.includes("Node")) {
@@ -354,72 +354,72 @@ async function setEffectStyleId(params) {
 ### Características clave de la solución:
 
 1. **Sistema de timeout robusto**: 
-   - Implementación de un timeout de 8 segundos utilizando `Promise.race`
-   - Limpieza adecuada del timeout mediante `.finally()` para evitar fugas de memoria
+   - Timeout de 8 segundos con `Promise.race`
+   - `.finally()` limpia el timeout, sin fugas
 
 2. **Validación previa**:
-   - Verificación de la existencia del nodo antes de intentar aplicar el estilo
-   - Comprobación de que el nodo soporte estilos de efectos
-   - Validación de que el estilo de efecto exista mediante `figma.getLocalEffectStylesAsync()`
+   - Comprueba que el nodo existe antes de aplicar
+   - Comprueba que el nodo soporta estilos de efecto
+   - Comprueba que el estilo existe con `figma.getLocalEffectStylesAsync()`
 
 3. **Mensajes de error específicos**:
-   - Categorización de los errores para proporcionar mensajes más útiles
-   - Sugerencias personalizadas según el tipo de error
-   - Información detallada para facilitar la depuración
+   - Errores por categoría
+   - Sugerencias por tipo de error
+   - Detalle para depurar
 
 4. **Registro mejorado**:
-   - Incorporación de mensajes de log detallados para facilitar la depuración
-   - Captura y registro de la pila de llamadas cuando ocurren errores
+   - Logs detallados
+   - Registra la pila de llamadas en los errores
 
 **Motivos de la Implementación**
 
-Esta solución se implementó siguiendo un patrón consistente con las otras tres herramientas que presentaban problemas similares:
+El mismo patrón que en las otras tres herramientas:
 
-1. **Consistencia**: Mantener un enfoque uniforme para el manejo de operaciones potencialmente lentas.
+1. **Consistencia**: Un solo trato para las operaciones lentas.
 
-2. **Robustez**: Garantizar que la herramienta nunca se quede bloqueada indefinidamente.
+2. **Robustez**: La herramienta nunca se cuelga.
 
-3. **Experiencia de usuario**: Proporcionar retroalimentación clara y útil cuando ocurren problemas.
+3. **Usuario**: Aviso claro cuando algo falla.
 
-4. **Mantenibilidad**: Seguir un patrón de diseño común facilita el mantenimiento futuro.
+4. **Mantenibilidad**: Un patrón común se mantiene mejor.
 
 **Beneficios de la Solución**
 
-Esta implementación proporciona varias ventajas:
+Ventajas:
 
-1. **Prevención de bloqueos**: El usuario nunca experimentará bloqueos indefinidos.
+1. **Sin cuelgues**.
 
-2. **Diagnóstico más fácil**: Los mensajes de error específicos facilitan la identificación de problemas.
+2. **Diagnóstico**: Errores concretos.
 
-3. **Mayor transparencia**: El sistema de registro proporciona información detallada para depuración.
+3. **Transparencia**: Logs con detalle.
 
-4. **Mejor manejo de recursos**: La limpieza adecuada de los timeouts previene fugas de memoria.
+4. **Recursos**: Timeouts limpios, sin fugas.
 
 **Validación**
 
-La solución ha sido probada satisfactoriamente en diversos escenarios:
+Probada en varios escenarios:
 
-- Aplicación de estilos de efectos válidos a nodos compatibles
-- Intentos de aplicar estilos a nodos inexistentes
-- Intentos de aplicar estilos inexistentes
-- Intentos de aplicar estilos a nodos que no soportan efectos
+- Estilos válidos sobre nodos compatibles
+- Estilos sobre nodos inexistentes
+- Estilos inexistentes
+- Estilos sobre nodos sin soporte de efectos
 
-En todos los casos, la herramienta responde correctamente con un resultado exitoso o un mensaje de error descriptivo.
+En todos los casos responde con un resultado o con un error claro.
 
 **Conclusión**
 
-Con esta implementación, se completa la corrección de las cuatro herramientas que presentaban problemas de timeout, siguiendo un patrón de diseño consistente. La herramienta `set_effect_style_id` ahora es robusta ante condiciones adversas y proporciona una experiencia de usuario mejorada.
+Con esto quedan corregidas las cuatro herramientas con problemas de timeout, todas con el mismo patrón. `set_effect_style_id` aguanta condiciones adversas y trata mejor al usuario.
 
 ## Estrategia general para implementaciones futuras
 
-Para las herramientas pendientes y futuras mejoras, se recomienda seguir estos principios:
+Para lo pendiente y lo futuro:
 
-1. **Manejo consistente de errores**: Usar excepciones en lugar de objetos de error personalizados
-2. **Implementar timeouts**: Para todas las operaciones que podrían bloquearse
-3. **Validación robusta**: Verificar parámetros y disponibilidad de APIs antes de usarlas
-4. **Logging detallado**: Registrar información de diagnóstico para facilitar la depuración
-5. **Respuestas progresivas**: Para operaciones largas, proporcionar actualizaciones de progreso
-6. **Ejecución no bloqueante**: Ejecutar operaciones intensivas en promesas separadas para mantener la UI responsiva
-7. **Limpieza de recursos**: Asegurar que todos los recursos (como timeouts) se liberen correctamente
+1. **Errores**: Excepciones, no objetos de error a medida
+2. **Timeouts**: En toda operación que pueda colgarse
+3. **Validación**: Comprobar parámetros y APIs antes de usarlas
+4. **Logging**: Registrar lo que ayude a depurar
+5. **Progreso**: Las operaciones largas avisan de su avance
+6. **No bloquear**: Lo pesado va en promesas aparte, con la UI viva
+7. **Limpieza**: Liberar todos los recursos, timeouts incluidos
 
-Esta estrategia ayudará a mantener la consistencia en el código y asegurará una experiencia más robusta para los usuarios del plugin.
+Así el código queda uniforme y el plugin aguanta más.
