@@ -1,57 +1,57 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+This file records the changes worth knowing about.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and the version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.8.0] - 2026-02-01
 
 ### Added
-- **🚀 Unified Launcher**: New `npx claude-talk-to-figma-mcp` command that handles repository setup, dependencies, and execution in a single step.
-- **🛠️ Smart Bootstrapping**: Automated Bun detection and installation prompts for an optimized experience.
+- **🚀 Unified Launcher**: A new `npx claude-talk-to-figma-mcp` command clones the repository, installs the dependencies and starts the server, in one step.
+- **🛠️ Smart Bootstrapping**: The launcher looks for Bun, and offers to install it when it is missing.
 
 ### Fixed
-- **🛡️ Type Safety**: Updated `FigmaCommand` union types to include all new tools, resolving TypeScript compilation errors during CI/CD.
-- **🏗️ CI/CD Permissions**: Fixed 403 errors in GitHub Actions by granting explicit write permissions for DXT package releases.
+- **🛡️ Type Safety**: The `FigmaCommand` union now lists every new tool, so TypeScript stops failing the build.
+- **🏗️ CI/CD Permissions**: GitHub Actions now has write permission for DXT releases, which ends the 403 errors.
 
 ## [0.7.0] - 2026-01-31
 
 ### Added
-- **🎨 Text Styles**: New `set_text_style_id` tool to apply local text styles to nodes (Thanks to [Rob Dearborn](https://github.com/rfdearborn) - [PR #43](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/43))
-- **🏷️ Rename Node**: New `rename_node` tool for better document organization (Thanks to [Beomsu Koh](https://github.com/GoBeromsu) - [PR #36](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/36))
-- **📑 Page Management**: Comprehensive suite of tools for managing document pages: `create_page`, `delete_page`, `rename_page`, `get_pages`, and `set_current_page` (Thanks to [sk (kovalevsky)](https://github.com/kovalevsky) - [PR #32](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/32))
+- **🎨 Text Styles**: A new `set_text_style_id` tool applies a local text style to a node (Thanks to [Rob Dearborn](https://github.com/rfdearborn) - [PR #43](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/43))
+- **🏷️ Rename Node**: A new `rename_node` tool helps keep a document tidy (Thanks to [Beomsu Koh](https://github.com/GoBeromsu) - [PR #36](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/36))
+- **📑 Page Management**: Tools for a document's pages: `create_page`, `delete_page`, `rename_page`, `get_pages` and `set_current_page` (Thanks to [sk (kovalevsky)](https://github.com/kovalevsky) - [PR #32](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/32))
 
 ### Fixed
-- **🚀 Performance**: Optimized component lookup using `findAllWithCriteria` to resolve initialization timeouts (Thanks to [Rob Dearborn](https://github.com/rfdearborn) - [PR #42](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/42))
-- **📸 SVG Export**: Corrected format parameter handling for SVG exports and increased timeouts for large exports (Thanks to [sk (kovalevsky)](https://github.com/kovalevsky) - [PR #32](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/32))
-- **🛡️ Validation**: Improved Zod validation for `join_channel` by making the channel parameter strictly mandatory (Thanks to [Timur](https://github.com/Mirsmog) - [PR #29](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/29))
+- **🚀 Performance**: Component lookup now uses `findAllWithCriteria`, which ends the timeouts at start-up (Thanks to [Rob Dearborn](https://github.com/rfdearborn) - [PR #42](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/42))
+- **📸 SVG Export**: SVG exports now read the format parameter properly, and large exports get longer to finish (Thanks to [sk (kovalevsky)](https://github.com/kovalevsky) - [PR #32](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/32))
+- **🛡️ Validation**: `join_channel` now demands its channel parameter (Thanks to [Timur](https://github.com/Mirsmog) - [PR #29](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/29))
 
 ## [0.6.1] - 2025-08-02
 
 ### Fixed
-- **`set_stroke_color` Tool**: Corrected a validation rule that incorrectly rejected a `strokeWeight` of `0`. This change allows for the creation of invisible strokes, aligning the tool's behavior with Figma's capabilities. (Thanks to [Taylor Smits](https://github.com/smitstay) - [PR #16](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/16))
+- **`set_stroke_color` Tool**: A rule wrongly rejected a `strokeWeight` of `0`. It no longer does, so you can make a stroke invisible, as Figma allows. (Thanks to [Taylor Smits](https://github.com/smitstay) - [PR #16](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/16))
 
 ## [0.6.0] - 2025-07-15
 
 ### Added
-- **🚀 DXT Package Support**: Complete implementation of Anthropic's Desktop Extensions format for Claude Desktop
-- **📦 Automated CI/CD Pipeline**: GitHub Actions workflow for automatic DXT package generation and release distribution
-- **🔧 DXT Build Scripts**: New npm scripts for DXT packaging (`pack`, `build:dxt`, `sync-version`)
-- **📋 .dxtignore Configuration**: Optimized package exclusions for minimal DXT file size (11.6MB compressed)
-- **🎯 Dual Distribution Strategy**: NPM registry for developers + DXT packages for end users
+- **🚀 DXT Package Support**: The project now builds Anthropic's Desktop Extensions format for Claude Desktop
+- **📦 Automated CI/CD Pipeline**: A GitHub Actions workflow builds the DXT package and attaches it to the release
+- **🔧 DXT Build Scripts**: New npm scripts for DXT packaging: `pack`, `build:dxt` and `sync-version`
+- **📋 .dxtignore Configuration**: Exclusions that cut the package to 11.6MB compressed
+- **🎯 Dual Distribution Strategy**: the NPM registry for developers, DXT packages for everyone else
 
 ### Changed
-- **⚡ Installation Experience**: Reduced setup time from 15-30 minutes to 2-5 minutes via one-click DXT installation
-- **📖 Documentation**: Enhanced README with comprehensive DXT installation instructions and troubleshooting
-- **🏗️ Build Process**: Improved version synchronization between package.json and manifest.json
-- **🔄 Release Workflow**: Automated DXT package attachment to GitHub releases
+- **⚡ Installation Experience**: One-click DXT installation cuts setup from 15-30 minutes to 2-5
+- **📖 Documentation**: The README now covers DXT installation and what to do when it goes wrong
+- **🏗️ Build Process**: `package.json` and `manifest.json` now keep the same version
+- **🔄 Release Workflow**: The workflow attaches the DXT package to the GitHub release
 
 ### Technical Details
-- Added `@anthropic-ai/dxt@^0.2.0` development dependency for DXT packaging
-- Implemented robust error handling and validation in CI/CD pipeline
-- Enhanced build artifacts with 90-day retention for testing and rollback capabilities
-- Established quality gates ensuring DXT packages only build after successful test suites
+- Added the `@anthropic-ai/dxt@^0.2.0` development dependency for DXT packaging
+- The CI/CD pipeline now handles errors and checks its work
+- Build artifacts are kept 90 days, so you can test or roll back
+- A DXT package only builds after the tests pass
 
 ### Credits
 - **DXT Implementation**: [Taylor Smits](https://github.com/smitstay) - [PR #17](https://github.com/arinspunk/claude-talk-to-figma-mcp/pull/17)
@@ -59,95 +59,95 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.3] - 2025-06-20
 
 ### Added
-- Added Windows-specific build command (`build:win`: `tsup`) for improved cross-platform compatibility
-- Enhanced build process to support development on Windows systems without chmod dependency
+- A Windows build command, `build:win`, which runs `tsup`
+- The build now works on Windows, where there is no `chmod`
 
 ### Fixed
-- Resolved Windows build compatibility issues where `chmod` command would fail on Windows systems
-- Improved developer experience for Windows users by providing dedicated build script
+- The build no longer fails on Windows, where `chmod` does not run
+- Windows users get their own build script
 
 ### Changed
-- Separated Unix/Linux build process (with executable permissions) from Windows build process
-- Updated installation documentation to reflect platform-specific build commands
+- The Unix build, which sets executable permissions, is now separate from the Windows build
+- The install documentation now names the build command for each platform
 
 ## [0.5.2] - 2025-06-19
 
 ### Fixed
-- Fixed critical opacity handling bug in `set_stroke_color` where `a: 0` (transparent) was incorrectly converted to `a: 1` (opaque)
-- Fixed stroke weight handling where `strokeWeight: 0` (no border) was incorrectly converted to `strokeWeight: 1`
-- Resolved problematic `||` operator usage that affected falsy values in color and stroke operations
+- `set_stroke_color` turned `a: 0`, which means transparent, into `a: 1`, which means opaque. It no longer does.
+- It also turned `strokeWeight: 0`, which means no border, into `strokeWeight: 1`
+- Both came from `||`, which treats a falsy value as a missing one
 
 ### Added
-- Extended `applyDefault()` utility function to handle stroke weight defaults safely
-- Added `FIGMA_DEFAULTS.stroke.weight` constant for centralized stroke configuration
-- Comprehensive test suite for `set_stroke_color` covering edge cases and integration scenarios
-- Enhanced validation for RGB components in stroke operations
+- `applyDefault()` now covers the stroke weight default
+- A `FIGMA_DEFAULTS.stroke.weight` constant holds the stroke default in one place
+- Tests for `set_stroke_color`, its edge cases and how it fits with the rest
+- Stronger checks on the RGB components in stroke work
 
 ### Changed
-- Improved architectural consistency by applying the same safe defaults pattern from `set_fill_color` to `set_stroke_color`
-- Enhanced separation of concerns between MCP layer (business logic) and Figma plugin (pure translator)
-- Renamed `weight` parameter to `strokeWeight` for better clarity and consistency
-- Updated Figma plugin to expect complete data from MCP layer instead of handling defaults internally
+- `set_stroke_color` now applies defaults the way `set_fill_color` does
+- The MCP layer holds the logic; the Figma plugin only translates
+- Renamed the `weight` parameter to `strokeWeight`
+- The Figma plugin now expects complete data, and applies no defaults of its own
 
 ### Technical Details
 - Replaced `strokeWeight: strokeWeight || 1` with `applyDefault(strokeWeight, FIGMA_DEFAULTS.stroke.weight)`
-- Enhanced type safety with proper `Color` and `ColorWithDefaults` interface usage
-- Improved error messages and validation for better debugging experience
+- Uses the `Color` and `ColorWithDefaults` interfaces properly
+- Clearer error messages, and more checks
 
 ## [0.5.1] - 2025-06-15
 
 ### Fixed
-- Fixed opacity handling in `set_fill_color` to properly respect alpha values
-- Added `applyColorDefaults` function to ensure appropriate default values for colors
+- `set_fill_color` now respects the alpha value
+- Added `applyColorDefaults`, which gives a colour its default values
 
 ### Added
-- Added automated tests for color functions and node manipulation
+- Tests for the colour functions and for node handling
 
 ### Changed
-- Improved TypeScript typing for colors and related properties
-- General code cleanup and better utility organization
+- Better TypeScript types for colours and their properties
+- Tidied the code and the utilities
 
 ## [0.5.0] - 2025-05-28
 
 ### Changed
-- Implemented modular tool structure for better maintainability
-- Enhanced handling of complex operations with timeouts and chunking
-- Improved error handling and recovery for all tools
-- Improved TypeScript typing and standardized error handling
+- The tools are now split into modules, which are easier to maintain
+- Long operations now use timeouts and chunking
+- Every tool handles and recovers from errors better
+- Better TypeScript types, and one way of handling errors
 
 ### Fixed
-- Fixed channel connection issues with improved state management
-- Resolved timeout problems in `flatten_node`, `create_component_instance`, and `set_effect_style_id`
-- Enhanced remote component access with better error handling
+- Channel connections hold, because the state is tracked better
+- `flatten_node`, `create_component_instance` and `set_effect_style_id` no longer time out
+- Reaching a remote component handles its errors better
 
 ### Added
-- Comprehensive documentation of tool categories and capabilities
+- Documentation of what each group of tools does
 
 ## [0.4.0] - 2025-04-15
 
 ### Added
-- New tools for creating advanced shapes:
-  - `create_ellipse`: Creation of ellipses and circles
-  - `create_polygon`: Creation of polygons with customizable sides
-  - `create_star`: Creation of stars with customizable points and inner radius
-  - `create_vector`: Creation of complex vector shapes
-  - `create_line`: Creation of straight lines
-- Advanced text and font manipulation capabilities
-- New commands for controlling typography: font styles, spacing, text case, and more
-- Support for accessing team library components
-- Improved error handling and timeout management
-- Enhanced text scanning capabilities
+- New tools for shapes:
+  - `create_ellipse`: ellipses and circles
+  - `create_polygon`: polygons, with a side count you choose
+  - `create_star`: stars, with a point count and an inner radius you choose
+  - `create_vector`: vector shapes
+  - `create_line`: straight lines
+- More ways to work with text and fonts
+- New commands for typography: font style, spacing, text case and more
+- Access to team library components
+- Better error handling, and better timeouts
+- Better text scanning
 
 ### Changed
-- Improvements in documentation and usage examples
+- Better documentation and examples
 
 ## [0.3.0] - 2025-03-10
 
 ### Added
-- Added `set_auto_layout` command to configure auto layout properties for frames and groups
-- Support for settings for layout direction, padding, item spacing, alignment and more
+- Added the `set_auto_layout` command, which sets auto layout on a frame or a group
+- It sets layout direction, padding, item spacing, alignment and more
 
 ## [0.2.0] - 2025-02-01
 
 ### Added
-- Initial public release with Claude Desktop support
+- First public release, with Claude Desktop support
